@@ -43,8 +43,31 @@
 {
     //NOTE: Tight UI Loop if shouldInvalidateLayoutForBoundsChange returns YES
 
-    [super prepareLayout];
+    //NOTE: Testing short cycle to improve performance
+    if (_totalLayoutSize.height > 0)
+    {
+        //Layout is already calculated, only adjust sticky cells
+        
+        NSArray *stickyIndexPaths = self.collectionView.indexPathsForVisibleItems;
+
+        for (UICollectionViewLayoutAttributes *item in _stickyAttributes)
+             //[self stickyAttributesForElementsInRect:self.collectionView.bounds])
+        {
+            if ([stickyIndexPaths containsObject:item.indexPath])
+            {
+                [self adjustPositionForStickyCellAttributes:item];
+            }
+        }
+        
+        return;
+    }
     
+    [super prepareLayout];
+    [self calculateEntireLayout]; //Costly operation
+}
+
+- (void)calculateEntireLayout
+{
     //Using UICollectionView Sections as 'colums', and Items as 'rows'
     NSInteger columnCount = self.collectionView.numberOfSections;
     if (columnCount == 0)
@@ -57,17 +80,6 @@
         [self buildLayoutAttributes];
     }
     
-    //NOTE: Testing short cycle to improve performance
-    if (_totalLayoutSize.height > 0)
-    {
-        //Layout is already calculated, only adjust sticky cells
-        for (UICollectionViewLayoutAttributes *item in _stickyAttributes)
-        {
-            [self adjustPositionForStickyCellAttributes:item];
-        }
-        
-        return;
-    }
     
     [self checkStickyCellOptions];
     [self checkDragAndDropEnabled];
@@ -82,7 +94,7 @@
     CGFloat yPosition = 0.0;
     CGFloat totalWidth = 0.0;
     CGFloat totalHeight = 0.0;
-        
+    
     for (int column = 0; column < columnCount; column ++)
     {
         CGFloat columnHeight = 0.0;
@@ -166,6 +178,7 @@
 - (UICollectionViewLayoutAttributes *)layoutAttributesForItemAtIndexPath:(NSIndexPath *)indexPath
 {
     UICollectionViewLayoutAttributes *attributes = _itemAttributes[indexPath.section][indexPath.row];
+    
     return attributes;
 }
 
@@ -183,7 +196,24 @@
 
 - (BOOL)shouldInvalidateLayoutForBoundsChange:(CGRect)newBounds
 {
-    return YES; //NOTE: if YES, prepareLayout is called constantly during scrolling
+    return YES;
+}
+
+- (UICollectionViewLayoutInvalidationContext *)invalidationContextForBoundsChange:(CGRect)newBounds
+{
+    UICollectionViewLayoutInvalidationContext *context = [super invalidationContextForBoundsChange:newBounds];
+    
+    BOOL speedOverSmotheness = YES;
+    
+    //NOTE: selective invalidation speeds things up but makes sticky cells choppy
+    //Smoothness may be better with small number of cells
+    if (speedOverSmotheness)
+    {
+        NSArray *stickyIndexPaths = [_stickyAttributes valueForKeyPath:@"indexPath"];
+        [context invalidateItemsAtIndexPaths:stickyIndexPaths];
+    }
+    
+    return context;
 }
 
 #pragma mark - Sticky Cells
@@ -221,12 +251,12 @@
             frame.origin.y = self.collectionView.contentOffset.y;
             attributes.frame = frame;
         }
-        else
-        {
-            CGRect frame = attributes.frame;
-            frame.origin.y = 0;
-            attributes.frame = frame;
-        }
+//        else
+//        {
+//            CGRect frame = attributes.frame;
+//            frame.origin.y = 0;
+//            attributes.frame = frame;
+//        }
     }
     if (firstColumnSticky && attributes.indexPath.section == 0)
     {
@@ -243,12 +273,12 @@
             frame.origin.x = self.collectionView.contentOffset.x;
             attributes.frame = frame;
         }
-        else
-        {
-            CGRect frame = attributes.frame;
-            frame.origin.x = 0;
-            attributes.frame = frame;
-        }
+//        else
+//        {
+//            CGRect frame = attributes.frame;
+//            frame.origin.x = 0;
+//            attributes.frame = frame;
+//        }
     }
     // Ensure the corner tile always floats above the rest by setting max zIndex
     if (attributes.indexPath.section == 0 && attributes.indexPath.row == 0)
