@@ -7,9 +7,16 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		246987B31B1F88A9000A6069 /* CNStudent.m in Sources */ = {isa = PBXBuildFile; fileRef = 246987B21B1F88A9000A6069 /* CNStudent.m */; };
+		246987B61B20A696000A6069 /* CustomCollectionViewLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 246987B51B20A696000A6069 /* CustomCollectionViewLayout.m */; };
+		246987BA1B20E18B000A6069 /* TestCollectionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 246987B81B20E18B000A6069 /* TestCollectionViewController.m */; };
+		246987BE1B20E2A5000A6069 /* SwiftCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 246987BD1B20E2A5000A6069 /* SwiftCollectionViewController.swift */; };
+		246987C21B211AA7000A6069 /* TestCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 246987C01B211AA7000A6069 /* TestCollectionViewCell.m */; };
+		246987C31B211AA7000A6069 /* TestCollectionViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 246987C11B211AA7000A6069 /* TestCollectionViewCell.xib */; };
+		246987C81B22720A000A6069 /* UIColor+RandomColor.m in Sources */ = {isa = PBXBuildFile; fileRef = 246987C71B22720A000A6069 /* UIColor+RandomColor.m */; };
+		246987CB1B2377FB000A6069 /* MCCollectionViewPositionalLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 246987CA1B2377FB000A6069 /* MCCollectionViewPositionalLayout.m */; };
 		24762A3D1B1DFBC0006BAC01 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 24762A3C1B1DFBC0006BAC01 /* main.m */; };
 		24762A401B1DFBC0006BAC01 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 24762A3F1B1DFBC0006BAC01 /* AppDelegate.m */; };
-		24762A431B1DFBC0006BAC01 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 24762A421B1DFBC0006BAC01 /* ViewController.m */; };
 		24762A461B1DFBC0006BAC01 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 24762A441B1DFBC0006BAC01 /* Main.storyboard */; };
 		24762A481B1DFBC0006BAC01 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 24762A471B1DFBC0006BAC01 /* Images.xcassets */; };
 		24762A4B1B1DFBC0006BAC01 /* LaunchScreen.xib in Resources */ = {isa = PBXBuildFile; fileRef = 24762A491B1DFBC0006BAC01 /* LaunchScreen.xib */; };
@@ -27,13 +34,26 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		246987B11B1F88A9000A6069 /* CNStudent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CNStudent.h; sourceTree = "<group>"; };
+		246987B21B1F88A9000A6069 /* CNStudent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CNStudent.m; sourceTree = "<group>"; };
+		246987B41B20A696000A6069 /* CustomCollectionViewLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomCollectionViewLayout.h; sourceTree = "<group>"; };
+		246987B51B20A696000A6069 /* CustomCollectionViewLayout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomCollectionViewLayout.m; sourceTree = "<group>"; };
+		246987B71B20E18B000A6069 /* TestCollectionViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestCollectionViewController.h; sourceTree = "<group>"; };
+		246987B81B20E18B000A6069 /* TestCollectionViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestCollectionViewController.m; sourceTree = "<group>"; };
+		246987BC1B20E2A4000A6069 /* SeatingEditorPrototype-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SeatingEditorPrototype-Bridging-Header.h"; sourceTree = "<group>"; };
+		246987BD1B20E2A5000A6069 /* SwiftCollectionViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SwiftCollectionViewController.swift; sourceTree = "<group>"; };
+		246987BF1B211AA7000A6069 /* TestCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestCollectionViewCell.h; sourceTree = "<group>"; };
+		246987C01B211AA7000A6069 /* TestCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestCollectionViewCell.m; sourceTree = "<group>"; };
+		246987C11B211AA7000A6069 /* TestCollectionViewCell.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = TestCollectionViewCell.xib; sourceTree = "<group>"; };
+		246987C61B22720A000A6069 /* UIColor+RandomColor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIColor+RandomColor.h"; sourceTree = "<group>"; };
+		246987C71B22720A000A6069 /* UIColor+RandomColor.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIColor+RandomColor.m"; sourceTree = "<group>"; };
+		246987C91B2377FB000A6069 /* MCCollectionViewPositionalLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MCCollectionViewPositionalLayout.h; sourceTree = "<group>"; };
+		246987CA1B2377FB000A6069 /* MCCollectionViewPositionalLayout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MCCollectionViewPositionalLayout.m; sourceTree = "<group>"; };
 		24762A371B1DFBC0006BAC01 /* SeatingEditorPrototype.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SeatingEditorPrototype.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		24762A3B1B1DFBC0006BAC01 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		24762A3C1B1DFBC0006BAC01 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		24762A3E1B1DFBC0006BAC01 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		24762A3F1B1DFBC0006BAC01 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		24762A411B1DFBC0006BAC01 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		24762A421B1DFBC0006BAC01 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		24762A451B1DFBC0006BAC01 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		24762A471B1DFBC0006BAC01 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		24762A4A1B1DFBC0006BAC01 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/LaunchScreen.xib; sourceTree = "<group>"; };
@@ -83,12 +103,25 @@
 			children = (
 				24762A3E1B1DFBC0006BAC01 /* AppDelegate.h */,
 				24762A3F1B1DFBC0006BAC01 /* AppDelegate.m */,
-				24762A411B1DFBC0006BAC01 /* ViewController.h */,
-				24762A421B1DFBC0006BAC01 /* ViewController.m */,
+				246987B11B1F88A9000A6069 /* CNStudent.h */,
+				246987B21B1F88A9000A6069 /* CNStudent.m */,
+				246987B41B20A696000A6069 /* CustomCollectionViewLayout.h */,
+				246987B51B20A696000A6069 /* CustomCollectionViewLayout.m */,
+				246987C91B2377FB000A6069 /* MCCollectionViewPositionalLayout.h */,
+				246987CA1B2377FB000A6069 /* MCCollectionViewPositionalLayout.m */,
+				246987B71B20E18B000A6069 /* TestCollectionViewController.h */,
+				246987B81B20E18B000A6069 /* TestCollectionViewController.m */,
+				246987BF1B211AA7000A6069 /* TestCollectionViewCell.h */,
+				246987C01B211AA7000A6069 /* TestCollectionViewCell.m */,
+				246987C61B22720A000A6069 /* UIColor+RandomColor.h */,
+				246987C71B22720A000A6069 /* UIColor+RandomColor.m */,
+				246987C11B211AA7000A6069 /* TestCollectionViewCell.xib */,
+				246987BD1B20E2A5000A6069 /* SwiftCollectionViewController.swift */,
 				24762A441B1DFBC0006BAC01 /* Main.storyboard */,
 				24762A471B1DFBC0006BAC01 /* Images.xcassets */,
 				24762A491B1DFBC0006BAC01 /* LaunchScreen.xib */,
 				24762A3A1B1DFBC0006BAC01 /* Supporting Files */,
+				246987BC1B20E2A4000A6069 /* SeatingEditorPrototype-Bridging-Header.h */,
 			);
 			path = SeatingEditorPrototype;
 			sourceTree = "<group>";
@@ -201,6 +234,7 @@
 			files = (
 				24762A461B1DFBC0006BAC01 /* Main.storyboard in Resources */,
 				24762A4B1B1DFBC0006BAC01 /* LaunchScreen.xib in Resources */,
+				246987C31B211AA7000A6069 /* TestCollectionViewCell.xib in Resources */,
 				24762A481B1DFBC0006BAC01 /* Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -219,9 +253,15 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				24762A431B1DFBC0006BAC01 /* ViewController.m in Sources */,
+				246987C81B22720A000A6069 /* UIColor+RandomColor.m in Sources */,
 				24762A401B1DFBC0006BAC01 /* AppDelegate.m in Sources */,
+				246987C21B211AA7000A6069 /* TestCollectionViewCell.m in Sources */,
+				246987B61B20A696000A6069 /* CustomCollectionViewLayout.m in Sources */,
+				246987B31B1F88A9000A6069 /* CNStudent.m in Sources */,
+				246987CB1B2377FB000A6069 /* MCCollectionViewPositionalLayout.m in Sources */,
+				246987BA1B20E18B000A6069 /* TestCollectionViewController.m in Sources */,
 				24762A3D1B1DFBC0006BAC01 /* main.m in Sources */,
+				246987BE1B20E2A5000A6069 /* SwiftCollectionViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -349,9 +389,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				INFOPLIST_FILE = SeatingEditorPrototype/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "SeatingEditorPrototype/SeatingEditorPrototype-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
@@ -359,9 +402,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ENABLE_MODULES = YES;
 				INFOPLIST_FILE = SeatingEditorPrototype/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "SeatingEditorPrototype/SeatingEditorPrototype-Bridging-Header.h";
 			};
 			name = Release;
 		};
@@ -418,6 +463,7 @@
 				24762A5C1B1DFBC0006BAC01 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		24762A5D1B1DFBC0006BAC01 /* Build configuration list for PBXNativeTarget "SeatingEditorPrototypeTests" */ = {
 			isa = XCConfigurationList;
@@ -426,6 +472,7 @@
 				24762A5F1B1DFBC0006BAC01 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
