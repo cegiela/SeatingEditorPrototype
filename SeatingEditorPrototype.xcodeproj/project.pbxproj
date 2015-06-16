@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		246987B31B1F88A9000A6069 /* CNStudent.m in Sources */ = {isa = PBXBuildFile; fileRef = 246987B21B1F88A9000A6069 /* CNStudent.m */; };
-		246987B61B20A696000A6069 /* CustomCollectionViewLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 246987B51B20A696000A6069 /* CustomCollectionViewLayout.m */; };
 		246987BA1B20E18B000A6069 /* TestCollectionViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 246987B81B20E18B000A6069 /* TestCollectionViewController.m */; };
 		246987BE1B20E2A5000A6069 /* SwiftCollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 246987BD1B20E2A5000A6069 /* SwiftCollectionViewController.swift */; };
 		246987C21B211AA7000A6069 /* TestCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 246987C01B211AA7000A6069 /* TestCollectionViewCell.m */; };
@@ -36,8 +35,6 @@
 /* Begin PBXFileReference section */
 		246987B11B1F88A9000A6069 /* CNStudent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CNStudent.h; sourceTree = "<group>"; };
 		246987B21B1F88A9000A6069 /* CNStudent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CNStudent.m; sourceTree = "<group>"; };
-		246987B41B20A696000A6069 /* CustomCollectionViewLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomCollectionViewLayout.h; sourceTree = "<group>"; };
-		246987B51B20A696000A6069 /* CustomCollectionViewLayout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomCollectionViewLayout.m; sourceTree = "<group>"; };
 		246987B71B20E18B000A6069 /* TestCollectionViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestCollectionViewController.h; sourceTree = "<group>"; };
 		246987B81B20E18B000A6069 /* TestCollectionViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestCollectionViewController.m; sourceTree = "<group>"; };
 		246987BC1B20E2A4000A6069 /* SeatingEditorPrototype-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "SeatingEditorPrototype-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -105,8 +102,6 @@
 				24762A3F1B1DFBC0006BAC01 /* AppDelegate.m */,
 				246987B11B1F88A9000A6069 /* CNStudent.h */,
 				246987B21B1F88A9000A6069 /* CNStudent.m */,
-				246987B41B20A696000A6069 /* CustomCollectionViewLayout.h */,
-				246987B51B20A696000A6069 /* CustomCollectionViewLayout.m */,
 				246987C91B2377FB000A6069 /* MCCollectionViewPositionalLayout.h */,
 				246987CA1B2377FB000A6069 /* MCCollectionViewPositionalLayout.m */,
 				246987B71B20E18B000A6069 /* TestCollectionViewController.h */,
@@ -256,7 +251,6 @@
 				246987C81B22720A000A6069 /* UIColor+RandomColor.m in Sources */,
 				24762A401B1DFBC0006BAC01 /* AppDelegate.m in Sources */,
 				246987C21B211AA7000A6069 /* TestCollectionViewCell.m in Sources */,
-				246987B61B20A696000A6069 /* CustomCollectionViewLayout.m in Sources */,
 				246987B31B1F88A9000A6069 /* CNStudent.m in Sources */,
 				246987CB1B2377FB000A6069 /* MCCollectionViewPositionalLayout.m in Sources */,
 				246987BA1B20E18B000A6069 /* TestCollectionViewController.m in Sources */,
