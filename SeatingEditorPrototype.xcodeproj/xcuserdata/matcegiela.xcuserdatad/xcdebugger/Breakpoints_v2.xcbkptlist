@@ -42,11 +42,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "SeatingEditorPrototype/MCCollectionViewPositionalLayout.m"
-            timestampString = "456118242.240254"
+            timestampString = "456264375.085721"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "145"
-            endingLineNumber = "145"
+            startingLineNumber = "200"
+            endingLineNumber = "200"
             landmarkName = "-buildLayoutAttributes"
             landmarkType = "5">
          </BreakpointContent>
@@ -58,11 +58,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "SeatingEditorPrototype/MCCollectionViewPositionalLayout.m"
-            timestampString = "456118242.240254"
+            timestampString = "456264375.085721"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "209"
-            endingLineNumber = "209"
+            startingLineNumber = "283"
+            endingLineNumber = "283"
             landmarkName = "-adjustPositionForStickyCellAttributes:"
             landmarkType = "5">
          </BreakpointContent>
@@ -74,11 +74,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "SeatingEditorPrototype/MCCollectionViewPositionalLayout.m"
-            timestampString = "456118242.240254"
+            timestampString = "456264375.085721"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "230"
-            endingLineNumber = "230"
+            startingLineNumber = "304"
+            endingLineNumber = "304"
             landmarkName = "-adjustPositionForStickyCellAttributes:"
             landmarkType = "5">
          </BreakpointContent>
@@ -90,12 +90,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "SeatingEditorPrototype/MCCollectionViewPositionalLayout.m"
-            timestampString = "456118242.240254"
+            timestampString = "456270559.433204"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "384"
-            endingLineNumber = "384"
-            landmarkName = "-handleLongPressGesture:"
+            startingLineNumber = "611"
+            endingLineNumber = "611"
+            landmarkName = "-gestureRecognizerShouldBegin:"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>
@@ -106,11 +106,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "SeatingEditorPrototype/MCCollectionViewPositionalLayout.m"
-            timestampString = "456118242.240254"
+            timestampString = "456270559.433204"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "418"
-            endingLineNumber = "418"
+            startingLineNumber = "529"
+            endingLineNumber = "529"
             landmarkName = "-handlePanGesture:"
             landmarkType = "5">
          </BreakpointContent>
@@ -122,12 +122,76 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "SeatingEditorPrototype/MCCollectionViewPositionalLayout.m"
-            timestampString = "456118242.240254"
+            timestampString = "456270559.433204"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "525"
-            endingLineNumber = "525"
-            landmarkName = "-gestureRecognizerShouldBegin:"
+            startingLineNumber = "534"
+            endingLineNumber = "534"
+            landmarkName = "-handlePanGesture:"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "SeatingEditorPrototype/MCCollectionViewPositionalLayout.m"
+            timestampString = "456264375.085721"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "508"
+            endingLineNumber = "508"
+            landmarkName = "-handlePanGesture:"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "SeatingEditorPrototype/MCCollectionViewPositionalLayout.m"
+            timestampString = "456264375.085721"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "503"
+            endingLineNumber = "503"
+            landmarkName = "-handlePanGesture:"
+            landmarkType = "5">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "SeatingEditorPrototype/MCCollectionViewPositionalLayout.m"
+            timestampString = "456264569.885262"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "72"
+            endingLineNumber = "72"
+            landmarkName = "factorByOverScroll()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "SeatingEditorPrototype/MCCollectionViewPositionalLayout.m"
+            timestampString = "456270559.433204"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "588"
+            endingLineNumber = "588"
+            landmarkName = "-scrollByTimer"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

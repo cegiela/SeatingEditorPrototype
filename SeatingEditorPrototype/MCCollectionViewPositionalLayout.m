@@ -13,21 +13,64 @@
 @property (nonatomic, assign) MCCollectionViewLayoutStickyOptions stickySetting;
 @property (nonatomic, strong) NSMutableArray *itemAttributes;
 @property (nonatomic, strong) NSMutableArray *stickyAttributes;
-@property (nonatomic, assign) CGSize totalLayoutSize;
 
 @property (nonatomic, strong) UILongPressGestureRecognizer *longPressGestureRecognizer;
 @property (nonatomic, strong) UIPanGestureRecognizer *panGestureRecognizer;
+
 @property (nonatomic, strong) NSIndexPath *liftedItemIndexPath;
 @property (nonatomic, strong) UIImageView *liftedItemImage;
 @property (nonatomic, assign) CGPoint liftedItemCenter;
 @property (nonatomic, assign) CGPoint touchTranslation;
-@property (nonatomic, strong) CADisplayLink *refreshSyncTimer;
 
-@property (nonatomic, assign) UIEdgeInsets dragScrollBorder;
-@property (nonatomic, assign) CGFloat dragScrollSpeed;
+@property (nonatomic, assign) CGSize totalLayoutSize;
+@property (nonatomic, strong) CADisplayLink *scrollTimer;
+@property (nonatomic, assign) CGPoint dragScrollSpeed;
 @property (nonatomic, assign) BOOL dragAndDropEnabled;
 
 @end
+
+#pragma mark - Coordinate math
+
+static const CGPoint maxScrollSpeed = {600.f, 600.f};
+static const CGPoint maxOverScroll = {30.f, 30.f};
+static const CGFloat verticalOffset = 0.20f;
+static const UIEdgeInsets dragScrollBorder = {80.f, 80.f, 80.f, 80.f};
+static const CGSize defaultItemSize = {50.f, 50.f};
+
+static inline
+CGPoint pointAplusB(CGPoint pointA, CGPoint pointB)
+{
+    return CGPointMake(pointA.x + pointB.x, pointA.y + pointB.y);
+}
+
+static inline
+CGPoint pointAminusB(CGPoint pointA, CGPoint pointB)
+{
+    return CGPointMake(pointA.x - pointB.x, pointA.y - pointB.y);
+}
+
+static inline
+CGPoint verticalOffsetRelativeToSize(CGPoint point, CGSize size)
+{
+    return CGPointMake(point.x, point.y - size.height * verticalOffset);
+}
+
+static inline
+CGFloat speedProportionalToDistance(CGFloat maxSpeed, CGFloat distance, CGFloat maxDistance)
+{
+    CGFloat resultSpeed = MIN(maxSpeed, maxSpeed * (distance/maxDistance));
+    return resultSpeed;
+}
+
+static inline
+CGFloat factorByOverScroll(CGFloat overScroll, CGFloat maxOverScroll)
+{
+//    CGFloat unsignedValue = (overScroll >= 0) ?: -overScroll;
+    CGFloat result = 1-(overScroll/maxOverScroll);
+    result = round (result * 10) / 10.0;
+//    NSLog(@"\n F %.3f", result);
+    return result;
+}
 
 @implementation MCCollectionViewPositionalLayout
 
@@ -87,7 +130,7 @@
     if (self.itemSize.width == 0 || self.itemSize.height == 0)
     {
         //Set default cell size if needed
-        self.itemSize = CGSizeMake(50.0, 50.0);
+        self.itemSize = defaultItemSize;
     }
     
     CGFloat xPosition = 0.0;
@@ -185,7 +228,8 @@
 - (NSArray *)layoutAttributesForElementsInRect:(CGRect)rect
 {
     NSMutableArray *attributes = [NSMutableArray new];
-    for (NSArray *section in _itemAttributes) {
+    for (NSArray *section in _itemAttributes)
+    {
         [attributes addObjectsFromArray:[section filteredArrayUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(UICollectionViewLayoutAttributes *evaluatedObject, NSDictionary *bindings) {
             return CGRectIntersectsRect(rect, [evaluatedObject frame]);
         }]]];
@@ -315,9 +359,6 @@
             [self.collectionView addGestureRecognizer:self.panGestureRecognizer];
             self.panGestureRecognizer.delegate = self;
         }
-        
-        _dragScrollBorder = UIEdgeInsetsMake(50.0f, 50.0f, 50.0f, 50.0f);
-        _dragScrollSpeed = 300.f;
     }
     else
     {
@@ -330,12 +371,15 @@
 
 - (void)handleLongPressGesture:(UILongPressGestureRecognizer *)sender
 {
-    if (sender.state == UIGestureRecognizerStateChanged) {
+    if (sender.state == UIGestureRecognizerStateChanged)
+    {
         return;
     }
     
-    switch (sender.state) {
-        case UIGestureRecognizerStateBegan: {
+    switch (sender.state)
+    {
+        case UIGestureRecognizerStateBegan:
+        {
             
             CGPoint touchPoint = [sender locationInView:self.collectionView];
             NSIndexPath *indexPath = [self indexPathForItemClosestToPoint:touchPoint];
@@ -360,7 +404,8 @@
              animations:^{
                  _liftedItemImage.transform = CGAffineTransformMakeScale(1.1f, 1.1f);
                  
-                 _liftedItemImage.center = [self offsetPoint:_liftedItemImage.center proportionallyToSize:_liftedItemImage.frame.size];
+                 //Move the floating cell image up a bit for visibility
+                 _liftedItemImage.center = verticalOffsetRelativeToSize(_liftedItemImage.center, _liftedItemImage.frame.size);
              }
              completion:^(BOOL finished){
                  _liftedItemCenter = _liftedItemImage.center;
@@ -368,8 +413,10 @@
             
         } break;
         case UIGestureRecognizerStateEnded:
-        case UIGestureRecognizerStateCancelled: {
-            if(_liftedItemIndexPath == nil) {
+        case UIGestureRecognizerStateCancelled:
+        {
+            if(_liftedItemIndexPath == nil)
+            {
                 return;
             }
             
@@ -383,7 +430,7 @@
                  _liftedItemImage.center = layoutAttributes.center;
                  _liftedItemImage.transform = CGAffineTransformMakeScale(1.f, 1.f);
              }
-             completion:^(BOOL finished) {
+             completion:^(BOOL finished){
                  [_liftedItemImage removeFromSuperview];
                  _liftedItemImage = nil;
                  _liftedItemIndexPath = nil;
@@ -395,41 +442,23 @@
     }
 }
 
-- (CGPoint)addPoint:(CGPoint)a toPoint:(CGPoint)b
-{
-    return CGPointMake(a.x + b.x, a.y + b.y);
-}
-
-- (CGPoint)offsetPoint:(CGPoint)point proportionallyToSize:(CGSize)size
-{
-    return CGPointMake(point.x, point.y - size.height * 0.20);
-}
-
-- (void)handlePanGesture:(UIPanGestureRecognizer *)sender
-{
-    if(sender.state == UIGestureRecognizerStateChanged) {
-        _touchTranslation = [sender translationInView:self.collectionView];
-        _liftedItemImage.center = [self addPoint:_liftedItemCenter toPoint:_touchTranslation];
-
-        // Scroll...
-        }
-}
-    
 - (NSIndexPath *)indexPathForItemClosestToPoint:(CGPoint)point
 {
-    NSArray *layoutAttrsInRect;
+    NSArray *layoutAttributes;
     NSInteger closestDist = NSIntegerMax;
     NSIndexPath *indexPath;
     
     // We need original positions of cells
-    layoutAttrsInRect = [self.collectionView.collectionViewLayout layoutAttributesForElementsInRect:self.collectionView.bounds];
+    layoutAttributes = [self.collectionView.collectionViewLayout layoutAttributesForElementsInRect:self.collectionView.bounds];
     
-    // What cell are we closest to?
-    for (UICollectionViewLayoutAttributes *layoutAttr in layoutAttrsInRect) {
+    // Find closest cell
+    for (UICollectionViewLayoutAttributes *layoutAttr in layoutAttributes)
+    {
         CGFloat xd = layoutAttr.center.x - point.x;
         CGFloat yd = layoutAttr.center.y - point.y;
         NSInteger dist = sqrtf(xd*xd + yd*yd);
-        if (dist < closestDist) {
+        if (dist < closestDist)
+        {
             closestDist = dist;
             indexPath = layoutAttr.indexPath;
         }
@@ -444,6 +473,132 @@
     UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
     return image;
+}
+
+- (void)handlePanGesture:(UIPanGestureRecognizer *)sender
+{
+    switch (sender.state)
+    {
+        case UIGestureRecognizerStateBegan:
+        {
+            [self beginDragScrollTimer];
+        }
+            break;
+            
+        case UIGestureRecognizerStateChanged:
+        {
+            _touchTranslation = [sender translationInView:self.collectionView];
+            _liftedItemImage.center = pointAplusB(_liftedItemCenter, _touchTranslation);
+            
+            CGPoint touchPosition = [sender locationInView:self.collectionView];
+            CGPoint contentOffset = self.collectionView.contentOffset;
+            
+            //Get absolute screen position
+            touchPosition = pointAminusB(touchPosition, contentOffset);
+            _dragScrollSpeed = CGPointZero;
+            
+            // Determine Scrolling
+            if (touchPosition.x < dragScrollBorder.left)
+            {
+                CGFloat distance_X = dragScrollBorder.left - touchPosition.x;
+                _dragScrollSpeed.x = -speedProportionalToDistance(maxScrollSpeed.x, distance_X, dragScrollBorder.left);
+            }
+            else if (touchPosition.x > self.collectionView.frame.size.width - dragScrollBorder.right)
+            {
+                CGFloat borderPoint = self.collectionView.frame.size.width - dragScrollBorder.right;
+                CGFloat distance_X = touchPosition.x - borderPoint;
+                _dragScrollSpeed.x = speedProportionalToDistance(maxScrollSpeed.x, distance_X, dragScrollBorder.right);
+            }
+            
+            if (touchPosition.y < dragScrollBorder.top)
+            {
+                CGFloat distance_Y = dragScrollBorder.top - touchPosition.y;
+                _dragScrollSpeed.y = -speedProportionalToDistance(maxScrollSpeed.y, distance_Y, dragScrollBorder.top);
+            }
+            else if (touchPosition.y > self.collectionView.frame.size.height - dragScrollBorder.bottom)
+            {
+                CGFloat borderPoint = self.collectionView.frame.size.height - dragScrollBorder.bottom;
+                CGFloat distance_Y = touchPosition.y - borderPoint;
+                _dragScrollSpeed.y = speedProportionalToDistance(maxScrollSpeed.y, distance_Y, dragScrollBorder.bottom);
+            }
+        }
+            break;
+        case UIGestureRecognizerStateCancelled:
+            break;
+        case UIGestureRecognizerStateEnded:
+            [self endDragScrollTimer];
+            _touchTranslation = CGPointZero;
+            break;
+        case UIGestureRecognizerStateFailed:
+            [self endDragScrollTimer];
+            _touchTranslation = CGPointZero;
+            break;
+        default:
+            break;
+    }
+}
+
+- (void)beginDragScrollTimer
+{
+    if (_scrollTimer == nil) {
+        _scrollTimer = [CADisplayLink displayLinkWithTarget:self selector:@selector(scrollByTimer)];
+        [_scrollTimer addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSDefaultRunLoopMode];
+    }
+}
+
+- (void)endDragScrollTimer
+{
+    if (_scrollTimer != nil) {
+        [_scrollTimer invalidate];
+        _scrollTimer = nil;
+    }
+}
+
+- (void)scrollByTimer
+{
+    CGPoint initialContentOffset = self.collectionView.contentOffset;
+    CGSize contentSize = self.collectionView.contentSize;
+    CGRect bounds = self.collectionView.bounds;
+    
+    CGFloat overScroll_X = 0.f;
+    CGFloat overScroll_Y = 0.f;
+    
+//    CGFloat overScrollFactor_X = 1.f;
+//    CGFloat overScrollFactor_Y = 1.f;
+
+    //Taper scroll speed when scrolling goes out of bounds
+    if (initialContentOffset.x < 0 && _dragScrollSpeed.x < 0)
+    {
+        overScroll_X = -initialContentOffset.x;
+    }
+    else if (initialContentOffset.x + bounds.size.width > contentSize.width && _dragScrollSpeed.x > 0)
+    {
+        overScroll_X = (initialContentOffset.x + bounds.size.width) - contentSize.width;
+    }
+    
+    if (initialContentOffset.y < 0 && _dragScrollSpeed.y < 0)
+    {
+        overScroll_Y = -initialContentOffset.y;
+    }
+    else if (initialContentOffset.y + bounds.size.height > contentSize.height && _dragScrollSpeed.y > 0)
+    {
+        overScroll_Y = (initialContentOffset.y + bounds.size.height) - contentSize.height;
+    }
+
+    CGFloat factoredSpeed_X = _dragScrollSpeed.x * factorByOverScroll(overScroll_X, maxOverScroll.x) /60;
+    CGFloat factoredSpeed_Y = _dragScrollSpeed.y * factorByOverScroll(overScroll_Y, maxOverScroll.y) /60;
+    CGPoint distanceToScroll = CGPointMake(factoredSpeed_X , factoredSpeed_Y );
+    
+    //Do the scrolling
+    self.collectionView.contentOffset = pointAplusB(initialContentOffset, distanceToScroll);
+    
+    //Check actual amount scrolled (fractional amounts will be ingnored by the scrollView)
+    CGPoint actualScrolledDistance = CGPointMake(self.collectionView.contentOffset.x - initialContentOffset.x,
+                                                 self.collectionView.contentOffset.y - initialContentOffset.y);
+    
+    //Adjust lifted item position to stay in sync
+    _liftedItemCenter = pointAplusB(_liftedItemCenter, actualScrolledDistance);
+    _liftedItemImage.center = pointAplusB(_liftedItemCenter, _touchTranslation);
 }
 
 #pragma mark - Gesture Recogniser Delegate
@@ -472,6 +627,13 @@
     }
     
     return NO;
+}
+
+#pragma Handle Interruptions
+
+- (void)dealloc
+{
+    [self endDragScrollTimer];
 }
 
 @end
