@@ -30,13 +30,13 @@
 @end
 
 
-static const CGPoint maxScrollSpeed = {600.f, 600.f};
+static const CGPoint maxScrollSpeed = {800.f, 800.f};
 static const CGPoint maxOverscroll = {30.f, 30.f};
 static const CGFloat verticalOffset = 0.20f;
 static const UIEdgeInsets dragScrollBorder = {80.f, 80.f, 80.f, 80.f};
 static const CGSize defaultItemSize = {50.f, 50.f};
 static const BOOL stickyOverscroll = NO;
-static const BOOL speedOverSmotheness = YES;
+static const BOOL speedOverSmotheness = NO;
 
 
 #pragma mark - Coordinate math
@@ -422,11 +422,51 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
                  [_liftedItemImage removeFromSuperview];
                  _liftedItemImage = nil;
                  _liftedItemIndexPath = nil;
-                 [self.collectionView.collectionViewLayout invalidateLayout];
+//                 [self.collectionView.collectionViewLayout invalidateLayout];
+                 [self resetOverscroll];
              }];
             
         } break;
         default: break;
+    }
+}
+
+- (void)resetOverscroll
+{
+    CGRect bounds = self.collectionView.bounds;
+    CGSize contentSize = self.collectionView.contentSize;
+    CGFloat rightEdge = bounds.origin.x + bounds.size.width;
+    CGFloat bottomEdge = bounds.origin.y + bounds.size.height;
+
+    BOOL overscrolled = NO;
+    
+    if (bounds.origin.x < 0)
+    {
+        overscrolled = YES;
+        bounds.origin.x = 0;
+    }
+    
+    if (bounds.origin.y < 0)
+    {
+        overscrolled = YES;
+        bounds.origin.y = 0;
+    }
+    
+    if (rightEdge > contentSize.width)
+    {
+        overscrolled = YES;
+        bounds.origin.x -= rightEdge - contentSize.width;
+    }
+    
+    if (bottomEdge > contentSize.height)
+    {
+        overscrolled = YES;
+        bounds.origin.y -= bottomEdge - contentSize.height;
+    }
+    
+    if (overscrolled)
+    {
+        [self.collectionView scrollRectToVisible:bounds animated:YES];
     }
 }
 
