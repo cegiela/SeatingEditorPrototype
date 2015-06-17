@@ -29,13 +29,17 @@
 
 @end
 
-#pragma mark - Coordinate math
 
 static const CGPoint maxScrollSpeed = {600.f, 600.f};
-static const CGPoint maxOverScroll = {30.f, 30.f};
+static const CGPoint maxOverscroll = {30.f, 30.f};
 static const CGFloat verticalOffset = 0.20f;
 static const UIEdgeInsets dragScrollBorder = {80.f, 80.f, 80.f, 80.f};
 static const CGSize defaultItemSize = {50.f, 50.f};
+static const BOOL stickyOverscroll = NO;
+static const BOOL speedOverSmotheness = YES;
+
+
+#pragma mark - Coordinate math
 
 static inline
 CGPoint pointAplusB(CGPoint pointA, CGPoint pointB)
@@ -63,12 +67,10 @@ CGFloat speedProportionalToDistance(CGFloat maxSpeed, CGFloat distance, CGFloat 
 }
 
 static inline
-CGFloat factorByOverScroll(CGFloat overScroll, CGFloat maxOverScroll)
+CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
 {
-//    CGFloat unsignedValue = (overScroll >= 0) ?: -overScroll;
-    CGFloat result = 1-(overScroll/maxOverScroll);
+    CGFloat result = 1-(overscroll/maxOverscroll);
     result = round (result * 10) / 10.0;
-//    NSLog(@"\n F %.3f", result);
     return result;
 }
 
@@ -86,7 +88,6 @@ CGFloat factorByOverScroll(CGFloat overScroll, CGFloat maxOverScroll)
 {
     //NOTE: Tight UI Loop if shouldInvalidateLayoutForBoundsChange returns YES
 
-    //NOTE: Testing short cycle to improve performance
     if (_totalLayoutSize.height > 0)
     {
         //Layout is already calculated, only adjust sticky cells
@@ -94,7 +95,6 @@ CGFloat factorByOverScroll(CGFloat overScroll, CGFloat maxOverScroll)
         NSArray *stickyIndexPaths = self.collectionView.indexPathsForVisibleItems;
 
         for (UICollectionViewLayoutAttributes *item in _stickyAttributes)
-             //[self stickyAttributesForElementsInRect:self.collectionView.bounds])
         {
             if ([stickyIndexPaths containsObject:item.indexPath])
             {
@@ -247,10 +247,8 @@ CGFloat factorByOverScroll(CGFloat overScroll, CGFloat maxOverScroll)
 {
     UICollectionViewLayoutInvalidationContext *context = [super invalidationContextForBoundsChange:newBounds];
     
-    BOOL speedOverSmotheness = YES;
-    
-    //NOTE: selective invalidation speeds things up but makes sticky cells choppy
-    //Smoothness may be better with small number of cells
+    //NOTE: selective invalidation makes scrolling more responsive, but sticky cells feel choppy
+    //Smoothness is less performant, but looks better with a smaller number of cells
     if (speedOverSmotheness)
     {
         NSArray *stickyIndexPaths = [_stickyAttributes valueForKeyPath:@"indexPath"];
@@ -280,28 +278,6 @@ CGFloat factorByOverScroll(CGFloat overScroll, CGFloat maxOverScroll)
     BOOL firstRowSticky = ((_stickySetting & MCCollectionViewLayoutStickyFirstRow) == MCCollectionViewLayoutStickyFirstRow);
     BOOL firstColumnSticky = ((_stickySetting & MCCollectionViewLayoutStickyFirstColumn) == MCCollectionViewLayoutStickyFirstColumn);
     
-    if (firstRowSticky && attributes.indexPath.row == 0)
-    {
-        if (![_stickyAttributes containsObject:attributes])
-        {
-            [_stickyAttributes addObject:attributes];
-        }
-        
-        attributes.zIndex = NSIntegerMax - 1;
-        
-        if (self.collectionView.contentOffset.y > 0)
-        {
-            CGRect frame = attributes.frame;
-            frame.origin.y = self.collectionView.contentOffset.y;
-            attributes.frame = frame;
-        }
-//        else
-//        {
-//            CGRect frame = attributes.frame;
-//            frame.origin.y = 0;
-//            attributes.frame = frame;
-//        }
-    }
     if (firstColumnSticky && attributes.indexPath.section == 0)
     {
         if (![_stickyAttributes containsObject:attributes])
@@ -311,19 +287,31 @@ CGFloat factorByOverScroll(CGFloat overScroll, CGFloat maxOverScroll)
         
         attributes.zIndex = NSIntegerMax - 1;
 
-        if (self.collectionView.contentOffset.x > 0)
+        if (self.collectionView.contentOffset.x > 0 || stickyOverscroll)
         {
             CGRect frame = attributes.frame;
             frame.origin.x = self.collectionView.contentOffset.x;
             attributes.frame = frame;
         }
-//        else
-//        {
-//            CGRect frame = attributes.frame;
-//            frame.origin.x = 0;
-//            attributes.frame = frame;
-//        }
     }
+    
+    if (firstRowSticky && attributes.indexPath.row == 0)
+    {
+        if (![_stickyAttributes containsObject:attributes])
+        {
+            [_stickyAttributes addObject:attributes];
+        }
+        
+        attributes.zIndex = NSIntegerMax - 1;
+        
+        if (self.collectionView.contentOffset.y > 0 || stickyOverscroll)
+        {
+            CGRect frame = attributes.frame;
+            frame.origin.y = self.collectionView.contentOffset.y;
+            attributes.frame = frame;
+        }
+    }
+    
     // Ensure the corner tile always floats above the rest by setting max zIndex
     if (attributes.indexPath.section == 0 && attributes.indexPath.row == 0)
     {
@@ -560,39 +548,36 @@ CGFloat factorByOverScroll(CGFloat overScroll, CGFloat maxOverScroll)
     CGSize contentSize = self.collectionView.contentSize;
     CGRect bounds = self.collectionView.bounds;
     
-    CGFloat overScroll_X = 0.f;
-    CGFloat overScroll_Y = 0.f;
+    CGFloat overscroll_X = 0.f;
+    CGFloat overscroll_Y = 0.f;
     
-//    CGFloat overScrollFactor_X = 1.f;
-//    CGFloat overScrollFactor_Y = 1.f;
-
     //Taper scroll speed when scrolling goes out of bounds
     if (initialContentOffset.x < 0 && _dragScrollSpeed.x < 0)
     {
-        overScroll_X = -initialContentOffset.x;
+        overscroll_X = -initialContentOffset.x;
     }
     else if (initialContentOffset.x + bounds.size.width > contentSize.width && _dragScrollSpeed.x > 0)
     {
-        overScroll_X = (initialContentOffset.x + bounds.size.width) - contentSize.width;
+        overscroll_X = (initialContentOffset.x + bounds.size.width) - contentSize.width;
     }
     
     if (initialContentOffset.y < 0 && _dragScrollSpeed.y < 0)
     {
-        overScroll_Y = -initialContentOffset.y;
+        overscroll_Y = -initialContentOffset.y;
     }
     else if (initialContentOffset.y + bounds.size.height > contentSize.height && _dragScrollSpeed.y > 0)
     {
-        overScroll_Y = (initialContentOffset.y + bounds.size.height) - contentSize.height;
+        overscroll_Y = (initialContentOffset.y + bounds.size.height) - contentSize.height;
     }
 
-    CGFloat factoredSpeed_X = _dragScrollSpeed.x * factorByOverScroll(overScroll_X, maxOverScroll.x) /60;
-    CGFloat factoredSpeed_Y = _dragScrollSpeed.y * factorByOverScroll(overScroll_Y, maxOverScroll.y) /60;
+    CGFloat factoredSpeed_X = _dragScrollSpeed.x * factorByOverscroll(overscroll_X, maxOverscroll.x) /60;
+    CGFloat factoredSpeed_Y = _dragScrollSpeed.y * factorByOverscroll(overscroll_Y, maxOverscroll.y) /60;
     CGPoint distanceToScroll = CGPointMake(factoredSpeed_X , factoredSpeed_Y );
     
-    //Do the scrolling
+    //Scroll calculated distance (fractional amounts will be ingnored by the scrollView)
     self.collectionView.contentOffset = pointAplusB(initialContentOffset, distanceToScroll);
     
-    //Check actual amount scrolled (fractional amounts will be ingnored by the scrollView)
+    //Check actual amount scrolled
     CGPoint actualScrolledDistance = CGPointMake(self.collectionView.contentOffset.x - initialContentOffset.x,
                                                  self.collectionView.contentOffset.y - initialContentOffset.y);
     
