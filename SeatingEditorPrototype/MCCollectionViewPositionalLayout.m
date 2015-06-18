@@ -434,39 +434,42 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
 - (void)resetOverscroll
 {
     CGRect bounds = self.collectionView.bounds;
+    CGPoint offset = self.collectionView.contentOffset;
+    UIEdgeInsets insets = self.collectionView.contentInset;
     CGSize contentSize = self.collectionView.contentSize;
-    CGFloat rightEdge = bounds.origin.x + bounds.size.width;
-    CGFloat bottomEdge = bounds.origin.y + bounds.size.height;
+    CGFloat rightEdge = offset.x + bounds.size.width;
+    CGFloat bottomEdge = offset.y + bounds.size.height + insets.bottom;
+
+    contentSize.height += insets.top + insets.bottom;
+    contentSize.width += insets.left + insets.right;
 
     BOOL overscrolled = NO;
     
-    if (bounds.origin.x < 0)
+    if (offset.x < 0)
     {
         overscrolled = YES;
-        bounds.origin.x = 0;
+        offset.x = 0 - insets.left;
     }
-    
-    if (bounds.origin.y < 0)
+    else if (rightEdge > contentSize.width)
     {
         overscrolled = YES;
-        bounds.origin.y = 0;
+        offset.x = contentSize.width - bounds.size.width;
     }
-    
-    if (rightEdge > contentSize.width)
+
+    if (offset.y < 0)
     {
         overscrolled = YES;
-        bounds.origin.x -= rightEdge - contentSize.width;
+        offset.y = 0 - insets.top;
     }
-    
-    if (bottomEdge > contentSize.height)
+    else if (bottomEdge > contentSize.height)
     {
         overscrolled = YES;
-        bounds.origin.y -= bottomEdge - contentSize.height;
+        offset.y = contentSize.height - bounds.size.height;
     }
     
     if (overscrolled)
     {
-        [self.collectionView scrollRectToVisible:bounds animated:YES];
+        [self.collectionView setContentOffset:offset animated:YES];
     }
 }
 
@@ -476,10 +479,9 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
     NSInteger closestDist = NSIntegerMax;
     NSIndexPath *indexPath;
     
-    // We need original positions of cells
+    //Find closest visible cell
     layoutAttributes = [self.collectionView.collectionViewLayout layoutAttributesForElementsInRect:self.collectionView.bounds];
     
-    // Find closest cell
     for (UICollectionViewLayoutAttributes *layoutAttr in layoutAttributes)
     {
         CGFloat xd = layoutAttr.center.x - point.x;
@@ -495,7 +497,8 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
     return indexPath;
 }
 
-- (UIImage *)imageFromCell:(UICollectionViewCell *)cell {
+- (UIImage *)imageFromCell:(UICollectionViewCell *)cell
+{
     UIGraphicsBeginImageContextWithOptions(cell.bounds.size, cell.isOpaque, 0.0f);
     [cell.layer renderInContext:UIGraphicsGetCurrentContext()];
     UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
@@ -525,7 +528,7 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
             touchPosition = pointAminusB(touchPosition, contentOffset);
             _dragScrollSpeed = CGPointZero;
             
-            // Determine Scrolling
+            //Determine scrolling Speed
             if (touchPosition.x < dragScrollBorder.left)
             {
                 CGFloat distance_X = dragScrollBorder.left - touchPosition.x;
@@ -587,6 +590,10 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
     CGPoint initialContentOffset = self.collectionView.contentOffset;
     CGSize contentSize = self.collectionView.contentSize;
     CGRect bounds = self.collectionView.bounds;
+    UIEdgeInsets insets = self.collectionView.contentInset;
+    
+    contentSize.height += insets.top + insets.bottom;
+    contentSize.width += insets.left + insets.right;
     
     CGFloat overscroll_X = 0.f;
     CGFloat overscroll_Y = 0.f;
@@ -605,14 +612,15 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
     {
         overscroll_Y = -initialContentOffset.y;
     }
-    else if (initialContentOffset.y + bounds.size.height > contentSize.height && _dragScrollSpeed.y > 0)
+    else if (initialContentOffset.y + bounds.size.height >
+             contentSize.height && _dragScrollSpeed.y > 0)
     {
         overscroll_Y = (initialContentOffset.y + bounds.size.height) - contentSize.height;
     }
 
     CGFloat factoredSpeed_X = _dragScrollSpeed.x * factorByOverscroll(overscroll_X, maxOverscroll.x) /60;
     CGFloat factoredSpeed_Y = _dragScrollSpeed.y * factorByOverscroll(overscroll_Y, maxOverscroll.y) /60;
-    CGPoint distanceToScroll = CGPointMake(factoredSpeed_X , factoredSpeed_Y );
+    CGPoint distanceToScroll = CGPointMake(factoredSpeed_X, factoredSpeed_Y);
     
     //Scroll calculated distance (fractional amounts will be ingnored by the scrollView)
     self.collectionView.contentOffset = pointAplusB(initialContentOffset, distanceToScroll);

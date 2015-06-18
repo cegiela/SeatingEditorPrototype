@@ -8,6 +8,8 @@
 
 #import <UIKit/UIKit.h>
 
-@interface TestCollectionViewController : UICollectionViewController
+@interface TestCollectionViewController : UIViewController
+
+@property (weak, nonatomic) IBOutlet UICollectionView *collectionView;
 
 @end

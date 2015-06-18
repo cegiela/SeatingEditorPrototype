@@ -22,10 +22,13 @@
 
 static NSString * const reuseIdentifier = @"Cell";
 
-- (void)viewDidLoad {
+- (void)viewDidLoad
+{
     [super viewDidLoad];
     
     self.colors = [NSMutableDictionary new];
+    
+    self.collectionView.contentInset = UIEdgeInsetsMake(0.f, 0.f, 88.f, 0.f);
     
     [self.collectionView registerNib:[UINib nibWithNibName:@"TestCollectionViewCell" bundle:nil] forCellWithReuseIdentifier:reuseIdentifier];
     
@@ -35,12 +38,13 @@ static NSString * const reuseIdentifier = @"Cell";
 
 #pragma mark <UICollectionViewDataSource>
 
-- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
+{
     return 12;
 }
 
-
-- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+{
     return 12;
 }
 
@@ -49,7 +53,7 @@ static NSString * const reuseIdentifier = @"Cell";
     TestCollectionViewCell *cell = [collectionView dequeueReusableCellWithReuseIdentifier:reuseIdentifier forIndexPath:indexPath];
     
     // Configure the cell
-    cell.testLabel.text = [NSString stringWithFormat:(@"%i.%i"), indexPath.row, indexPath.section];
+    cell.testLabel.text = [NSString stringWithFormat:(@"%li.%li"), (long)indexPath.row, (long)indexPath.section];
     if (!self.colors[indexPath])
     {
         UIColor *color = [UIColor randomColor];
