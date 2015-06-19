@@ -29,8 +29,9 @@
 
 @end
 
-static const CGPoint maxScrollSpeed = {800.f, 800.f};
+static const CGPoint maxScrollSpeed = {10.f, 10.f};
 static const CGPoint maxOverscroll = {30.f, 30.f};
+static const UIEdgeInsets edgeResistance = {20.f, 20.f, 20.f, 20.f};
 static const CGFloat verticalOffset = 0.20f;
 static const UIEdgeInsets dragScrollBorder = {60.f, 60.f, 60.f, 60.f};
 static const CGSize defaultItemSize = {50.f, 50.f};
@@ -70,7 +71,7 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
 {
     CGFloat result = 1-(overscroll/maxOverscroll);
     result = round (result * 10) / 10.0;
-    return MAX(result, 1);
+    return MIN(result, 1);
 }
 
 
@@ -555,7 +556,7 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
             //Left
             if (touchPosition.x < leftThreshold)
             {
-                if (scrollZoneOrigin_X == NO)
+                if (scrollZoneOrigin_X == NO && touchPosition.x > leftThreshold - dragScrollBorder.left)
                 {
                     CGFloat distance_X = leftThreshold - touchPosition.x ;
                     _dragScrollSpeed.x = -speedProportionalToDistance(maxScrollSpeed.x, distance_X, dragScrollBorder.left);
@@ -564,7 +565,7 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
             //Right
             else if (touchPosition.x > rightThreshold)
             {
-                if (scrollZoneOrigin_X == NO)
+                if (scrollZoneOrigin_X == NO && touchPosition.x < bottomThreshold + dragScrollBorder.right)
                 {
                     CGFloat borderPoint = rightThreshold;
                     CGFloat distance_X = touchPosition.x - borderPoint;
@@ -579,7 +580,7 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
             //Top
             if (touchPosition.y < topThreshold)
             {
-                if (scrollZoneOrigin_Y == NO)
+                if (scrollZoneOrigin_Y == NO && touchPosition.y > topThreshold - dragScrollBorder.top)
                 {
                     CGFloat distance_Y = topThreshold - touchPosition.y;
                     _dragScrollSpeed.y = -speedProportionalToDistance(maxScrollSpeed.y, distance_Y, dragScrollBorder.top);
@@ -588,11 +589,15 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
             //Bottom
             else if (touchPosition.y > bottomThreshold)
             {
-                if (scrollZoneOrigin_Y == NO)
+                if (scrollZoneOrigin_Y == NO && touchPosition.y < bottomThreshold + dragScrollBorder.bottom)
                 {
                     CGFloat borderPoint = bottomThreshold;
                     CGFloat distance_Y = touchPosition.y - borderPoint;
                     _dragScrollSpeed.y = speedProportionalToDistance(maxScrollSpeed.y, distance_Y, dragScrollBorder.bottom);
+                }
+                else
+                {
+                    
                 }
             }
             else
@@ -626,11 +631,6 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
     }
 }
 
-- (void)calculateScrollSpeed
-{
-    
-}
-
 - (void)beginDragScrollTimer
 {
     if (_scrollTimer == nil) {
@@ -649,7 +649,7 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
 
 - (void)scrollByTimer
 {
-    //Check if scrolling is allowed (default YES)
+    //Check if scrolling is allowed (defaults to YES)
     if ([self.delegate respondsToSelector:@selector(collectionView:scrollDuringDraggingInLayout:)]
         && [self.delegate collectionView:self.collectionView scrollDuringDraggingInLayout:self] == NO)
     {
@@ -667,23 +667,10 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
     CGFloat overscroll_X = 0.f;
     CGFloat overscroll_Y = 0.f;
     
-    BOOL reverse_X = NO;
-    BOOL reverse_Y = NO;
-    
-    //Taper scroll speed when scrolling goes out of bounds
-    if (initialContentOffset.x < 0)
+    if (initialContentOffset.x < 0 && _dragScrollSpeed.x < 0)
     {
-        if (_dragScrollSpeed.x < 0)
-        {
-            overscroll_X = -initialContentOffset.x;
-        }
-        else if (_dragScrollSpeed.x == 0)
-        {
-            reverse_X = YES;
-        }
+        overscroll_X = -initialContentOffset.x;
     }
-    
-    /////!!! Make overscrolling proportional to touch location (both in and out)
     
     if (initialContentOffset.x + bounds.size.width > contentSize.width && _dragScrollSpeed.x > 0)
     {
@@ -700,22 +687,20 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
         overscroll_Y = (initialContentOffset.y + bounds.size.height) - contentSize.height;
     }
 
-    CGFloat factoredSpeed_X = _dragScrollSpeed.x * factorByOverscroll(overscroll_X, maxOverscroll.x) /60;
-    CGFloat factoredSpeed_Y = _dragScrollSpeed.y * factorByOverscroll(overscroll_Y, maxOverscroll.y) /60;
-    
+    CGFloat factoredSpeed_X = _dragScrollSpeed.x * factorByOverscroll(overscroll_X, maxOverscroll.x);
+    CGFloat factoredSpeed_Y = _dragScrollSpeed.y * factorByOverscroll(overscroll_Y, maxOverscroll.y);
     CGPoint distanceToScroll = CGPointMake(factoredSpeed_X, factoredSpeed_Y);
-
-    if (reverse_X)
+    
+#warning Make overscrolling proportional to touch location (both in and out)
+    if (initialContentOffset.x < 0)
     {
-        distanceToScroll.x = -initialContentOffset.x /5;
+//        distanceToScroll.x = _dragScrollSpeed.x + edgeResistance.left;        
     }
-    if (reverse_Y)
-    {
-        
-    }
+    
+    CGPoint newOffset = pointAplusB(initialContentOffset, distanceToScroll);
     
     //Scroll calculated distance (fractional amounts will be ingnored by the scrollView)
-    self.collectionView.contentOffset = pointAplusB(initialContentOffset, distanceToScroll);
+    self.collectionView.contentOffset = newOffset;
     
     //Check actual amount scrolled
     CGPoint actualScrolledDistance = CGPointMake(self.collectionView.contentOffset.x - initialContentOffset.x,
