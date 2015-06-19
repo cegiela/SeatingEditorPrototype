@@ -14,6 +14,7 @@ typedef NS_OPTIONS(NSUInteger, MCCollectionViewLayoutStickyOptions)
     MCCollectionViewLayoutStickyFirstRow           = 1 << 0,
     MCCollectionViewLayoutStickyFirstColumn        = 1 << 1,
     
+    //To be added later
 //    MCCollectionViewLayoutStickyLastRow            = 1 << 2,
 //    MCCollectionViewLayoutStickyLastColumn         = 1 << 3
 };
@@ -30,15 +31,21 @@ typedef NS_OPTIONS(NSUInteger, MCCollectionViewLayoutStickyOptions)
 //May need invalidateLayout on rotation to ensure sticky cells are repositioned.
 - (void)invalidateLayout;
 
+- (BOOL)collectionView:(UICollectionView *)collectionView scrollDuringDraggingInLayout:(UICollectionViewLayout*)collectionViewLayout;
+
+- (void)collectionView:(UICollectionView *)collectionView isDraggingItemInLayout:(UICollectionViewLayout*)collectionViewLayout;
+
 @end
 
 @interface MCCollectionViewPositionalLayout : UICollectionViewLayout
 
 // Fallback size for all cells if no specific sizes provided
 @property (nonatomic) CGSize itemSize;
+
 @property (nonatomic, assign) id <MCCollectionViewDelegatePositionalLayout> delegate;
 @property (nonatomic, readonly) UILongPressGestureRecognizer *longPressGestureRecognizer;
 @property (nonatomic, readonly) UIPanGestureRecognizer *panGestureRecognizer;
+@property (nonatomic, readonly) UIImageView *liftedItemImage;
 
 @end
 
@@ -48,3 +55,4 @@ typedef NS_OPTIONS(NSUInteger, MCCollectionViewLayoutStickyOptions)
 - (UIImage*)dragAndDropSnapshot;
 
 @end
+

@@ -29,11 +29,10 @@
 
 @end
 
-
 static const CGPoint maxScrollSpeed = {800.f, 800.f};
 static const CGPoint maxOverscroll = {30.f, 30.f};
 static const CGFloat verticalOffset = 0.20f;
-static const UIEdgeInsets dragScrollBorder = {80.f, 80.f, 80.f, 80.f};
+static const UIEdgeInsets dragScrollBorder = {60.f, 60.f, 60.f, 60.f};
 static const CGSize defaultItemSize = {50.f, 50.f};
 static const BOOL stickyOverscroll = NO;
 static const BOOL speedOverSmotheness = NO;
@@ -71,8 +70,9 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
 {
     CGFloat result = 1-(overscroll/maxOverscroll);
     result = round (result * 10) / 10.0;
-    return result;
+    return MAX(result, 1);
 }
+
 
 @implementation MCCollectionViewPositionalLayout
 
@@ -508,11 +508,33 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
 
 - (void)handlePanGesture:(UIPanGestureRecognizer *)sender
 {
+    static BOOL scrollZoneOrigin_X;
+    static BOOL scrollZoneOrigin_Y;
+    
+    CGPoint touchPosition = [sender locationInView:self.collectionView];
+    CGPoint contentOffset = self.collectionView.contentOffset;
+    UIEdgeInsets insets = self.collectionView.contentInset;
+    
+    //Get absolute screen position
+    touchPosition = pointAminusB(touchPosition, contentOffset);
+
     switch (sender.state)
     {
         case UIGestureRecognizerStateBegan:
         {
             [self beginDragScrollTimer];
+            
+            //Prevent scrolling if touch began inside a scroll border
+            if (touchPosition.x < dragScrollBorder.left ||
+                touchPosition.x > self.collectionView.frame.size.width - dragScrollBorder.right)
+            {
+                scrollZoneOrigin_X = YES;
+            }
+            if (touchPosition.y < dragScrollBorder.top ||
+                touchPosition.y > self.collectionView.frame.size.height - dragScrollBorder.bottom)
+            {
+                scrollZoneOrigin_Y = YES;
+            }
         }
             break;
             
@@ -521,36 +543,71 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
             _touchTranslation = [sender translationInView:self.collectionView];
             _liftedItemImage.center = pointAplusB(_liftedItemCenter, _touchTranslation);
             
-            CGPoint touchPosition = [sender locationInView:self.collectionView];
-            CGPoint contentOffset = self.collectionView.contentOffset;
-            
-            //Get absolute screen position
-            touchPosition = pointAminusB(touchPosition, contentOffset);
             _dragScrollSpeed = CGPointZero;
             
+            CGFloat leftThreshold = dragScrollBorder.left + insets.left;
+            CGFloat rightThreshold = self.collectionView.frame.size.width - dragScrollBorder.right - insets.right;
+            CGFloat topThreshold = dragScrollBorder.top + insets.top;
+            CGFloat bottomThreshold = self.collectionView.frame.size.height - dragScrollBorder.bottom - insets.bottom;
+
             //Determine scrolling Speed
-            if (touchPosition.x < dragScrollBorder.left)
+            
+            //Left
+            if (touchPosition.x < leftThreshold)
             {
-                CGFloat distance_X = dragScrollBorder.left - touchPosition.x;
-                _dragScrollSpeed.x = -speedProportionalToDistance(maxScrollSpeed.x, distance_X, dragScrollBorder.left);
+                if (scrollZoneOrigin_X == NO)
+                {
+                    CGFloat distance_X = leftThreshold - touchPosition.x ;
+                    _dragScrollSpeed.x = -speedProportionalToDistance(maxScrollSpeed.x, distance_X, dragScrollBorder.left);
+                }
             }
-            else if (touchPosition.x > self.collectionView.frame.size.width - dragScrollBorder.right)
+            //Right
+            else if (touchPosition.x > rightThreshold)
             {
-                CGFloat borderPoint = self.collectionView.frame.size.width - dragScrollBorder.right;
-                CGFloat distance_X = touchPosition.x - borderPoint;
-                _dragScrollSpeed.x = speedProportionalToDistance(maxScrollSpeed.x, distance_X, dragScrollBorder.right);
+                if (scrollZoneOrigin_X == NO)
+                {
+                    CGFloat borderPoint = rightThreshold;
+                    CGFloat distance_X = touchPosition.x - borderPoint;
+                    _dragScrollSpeed.x = speedProportionalToDistance(maxScrollSpeed.x, distance_X, dragScrollBorder.right);
+                }
+            }
+            else
+            {
+                scrollZoneOrigin_X = NO;
             }
             
-            if (touchPosition.y < dragScrollBorder.top)
+            //Top
+            if (touchPosition.y < topThreshold)
             {
-                CGFloat distance_Y = dragScrollBorder.top - touchPosition.y;
-                _dragScrollSpeed.y = -speedProportionalToDistance(maxScrollSpeed.y, distance_Y, dragScrollBorder.top);
+                if (scrollZoneOrigin_Y == NO)
+                {
+                    CGFloat distance_Y = topThreshold - touchPosition.y;
+                    _dragScrollSpeed.y = -speedProportionalToDistance(maxScrollSpeed.y, distance_Y, dragScrollBorder.top);
+                }
             }
-            else if (touchPosition.y > self.collectionView.frame.size.height - dragScrollBorder.bottom)
+            //Bottom
+            else if (touchPosition.y > bottomThreshold)
             {
-                CGFloat borderPoint = self.collectionView.frame.size.height - dragScrollBorder.bottom;
-                CGFloat distance_Y = touchPosition.y - borderPoint;
-                _dragScrollSpeed.y = speedProportionalToDistance(maxScrollSpeed.y, distance_Y, dragScrollBorder.bottom);
+                if (scrollZoneOrigin_Y == NO)
+                {
+                    CGFloat borderPoint = bottomThreshold;
+                    CGFloat distance_Y = touchPosition.y - borderPoint;
+                    _dragScrollSpeed.y = speedProportionalToDistance(maxScrollSpeed.y, distance_Y, dragScrollBorder.bottom);
+                }
+            }
+            else
+            {
+                scrollZoneOrigin_Y = NO;
+            }
+            
+            //Restrict scrolling due to touch originating inside a scroll border
+            if (scrollZoneOrigin_X)
+            {
+                _dragScrollSpeed.x = 0;
+            }
+            if (scrollZoneOrigin_Y)
+            {
+                _dragScrollSpeed.y = 0;
             }
         }
             break;
@@ -567,6 +624,11 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
         default:
             break;
     }
+}
+
+- (void)calculateScrollSpeed
+{
+    
 }
 
 - (void)beginDragScrollTimer
@@ -587,6 +649,13 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
 
 - (void)scrollByTimer
 {
+    //Check if scrolling is allowed (default YES)
+    if ([self.delegate respondsToSelector:@selector(collectionView:scrollDuringDraggingInLayout:)]
+        && [self.delegate collectionView:self.collectionView scrollDuringDraggingInLayout:self] == NO)
+    {
+        return;
+    }
+    
     CGPoint initialContentOffset = self.collectionView.contentOffset;
     CGSize contentSize = self.collectionView.contentSize;
     CGRect bounds = self.collectionView.bounds;
@@ -598,12 +667,25 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
     CGFloat overscroll_X = 0.f;
     CGFloat overscroll_Y = 0.f;
     
+    BOOL reverse_X = NO;
+    BOOL reverse_Y = NO;
+    
     //Taper scroll speed when scrolling goes out of bounds
-    if (initialContentOffset.x < 0 && _dragScrollSpeed.x < 0)
+    if (initialContentOffset.x < 0)
     {
-        overscroll_X = -initialContentOffset.x;
+        if (_dragScrollSpeed.x < 0)
+        {
+            overscroll_X = -initialContentOffset.x;
+        }
+        else if (_dragScrollSpeed.x == 0)
+        {
+            reverse_X = YES;
+        }
     }
-    else if (initialContentOffset.x + bounds.size.width > contentSize.width && _dragScrollSpeed.x > 0)
+    
+    /////!!! Make overscrolling proportional to touch location (both in and out)
+    
+    if (initialContentOffset.x + bounds.size.width > contentSize.width && _dragScrollSpeed.x > 0)
     {
         overscroll_X = (initialContentOffset.x + bounds.size.width) - contentSize.width;
     }
@@ -620,7 +702,17 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
 
     CGFloat factoredSpeed_X = _dragScrollSpeed.x * factorByOverscroll(overscroll_X, maxOverscroll.x) /60;
     CGFloat factoredSpeed_Y = _dragScrollSpeed.y * factorByOverscroll(overscroll_Y, maxOverscroll.y) /60;
+    
     CGPoint distanceToScroll = CGPointMake(factoredSpeed_X, factoredSpeed_Y);
+
+    if (reverse_X)
+    {
+        distanceToScroll.x = -initialContentOffset.x /5;
+    }
+    if (reverse_Y)
+    {
+        
+    }
     
     //Scroll calculated distance (fractional amounts will be ingnored by the scrollView)
     self.collectionView.contentOffset = pointAplusB(initialContentOffset, distanceToScroll);
