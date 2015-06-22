@@ -40,12 +40,12 @@ static NSString * const reuseIdentifier = @"Cell";
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
 {
-    return 12;
+    return 16;
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-    return 12;
+    return 16;
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
@@ -74,7 +74,7 @@ static NSString * const reuseIdentifier = @"Cell";
 
 - (MCCollectionViewLayoutStickyOptions)stickyOptionsForCollectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout
 {
-    return 0;//MCCollectionViewLayoutStickyFirstColumn | MCCollectionViewLayoutStickyFirstRow;
+    return 0;// MCCollectionViewLayoutStickyFirstColumn | MCCollectionViewLayoutStickyFirstRow;
 }
 
 - (BOOL)collectionView:(UICollectionView *)collectionView enableDragAndDropInlayout:(UICollectionViewLayout *)collectionViewLayout

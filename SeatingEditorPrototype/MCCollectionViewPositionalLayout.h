@@ -50,6 +50,10 @@ typedef NS_OPTIONS(NSUInteger, MCCollectionViewLayoutStickyOptions)
 @end
 
 @protocol MCCollectionViewPositionalLayoutCellDelegate <NSObject>
+
+- (void)hideLiftedView;
+- (void)showLiftedView;
+
 @optional
 
 - (UIImage*)dragAndDropSnapshot;
