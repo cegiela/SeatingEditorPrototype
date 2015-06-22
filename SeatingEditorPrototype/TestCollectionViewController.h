@@ -10,6 +10,4 @@
 
 @interface TestCollectionViewController : UIViewController
 
-@property (weak, nonatomic) IBOutlet UICollectionView *collectionView;
-
 @end

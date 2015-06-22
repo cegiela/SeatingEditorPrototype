@@ -18,7 +18,7 @@
 @property (nonatomic, strong) UIPanGestureRecognizer *panGestureRecognizer;
 
 @property (nonatomic, strong) NSIndexPath *liftedItemIndexPath;
-@property (nonatomic, strong) UIImageView *liftedItemImage;
+//@property (nonatomic, strong) UIImageView *liftedItemImage;
 @property (nonatomic, assign) CGPoint liftedItemCenter;
 @property (nonatomic, assign) CGPoint touchTranslation;
 
@@ -338,7 +338,6 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
             self.longPressGestureRecognizer.minimumPressDuration = 0.3;
             [self.collectionView addGestureRecognizer:self.longPressGestureRecognizer];
             self.longPressGestureRecognizer.delegate = self;
-
         }
         if (self.panGestureRecognizer == nil)
         {
@@ -369,11 +368,17 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
     {
         case UIGestureRecognizerStateBegan:
         {
-            
+            //Make sure gesture is native to this collection view
+            if (sender != self.longPressGestureRecognizer)
+            {
+                return;
+            }
+
             CGPoint touchPoint = [sender locationInView:self.collectionView];
             NSIndexPath *indexPath = [self indexPathForItemClosestToPoint:touchPoint];
-
-            if (indexPath == nil) {
+            
+            if (indexPath == nil)
+            {
                 return;
             }
             
@@ -399,7 +404,6 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
              completion:^(BOOL finished){
                  _liftedItemCenter = _liftedItemImage.center;
              }];
-            
         } break;
         case UIGestureRecognizerStateEnded:
         case UIGestureRecognizerStateCancelled:
@@ -411,25 +415,35 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
             
             // Land lifted image
             NSIndexPath *indexPath = [self indexPathForItemClosestToPoint:_liftedItemImage.center];
-            UICollectionViewLayoutAttributes *layoutAttributes = [self.collectionView layoutAttributesForItemAtIndexPath:indexPath];
+            UICollectionViewLayoutAttributes *itemAttributes = [self.collectionView layoutAttributesForItemAtIndexPath:indexPath];
 
             [UIView
              animateWithDuration:0.2
              animations:^{
-                 _liftedItemImage.center = layoutAttributes.center;
+                 _liftedItemImage.center = itemAttributes.center;
                  _liftedItemImage.transform = CGAffineTransformMakeScale(1.f, 1.f);
              }
              completion:^(BOOL finished){
                  [_liftedItemImage removeFromSuperview];
                  _liftedItemImage = nil;
                  _liftedItemIndexPath = nil;
-//                 [self.collectionView.collectionViewLayout invalidateLayout];
                  [self resetOverscroll];
+//                 [self resetDragAndDrop];
              }];
             
         } break;
         default: break;
     }
+}
+
+- (void)resetDragAndDrop
+{
+    [self endDragScrollTimer];
+    _touchTranslation = CGPointZero;
+    _dragScrollSpeed.x = 0;
+    _dragScrollSpeed.y = 0;
+
+    //                 [self.collectionView.collectionViewLayout invalidateLayout];
 }
 
 - (void)resetOverscroll
@@ -477,7 +491,7 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
 - (NSIndexPath *)indexPathForItemClosestToPoint:(CGPoint)point
 {
     NSArray *layoutAttributes;
-    NSInteger closestDist = NSIntegerMax;
+    NSInteger closestDistance = NSIntegerMax;
     NSIndexPath *indexPath;
     
     //Find closest visible cell
@@ -488,9 +502,9 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
         CGFloat xd = layoutAttr.center.x - point.x;
         CGFloat yd = layoutAttr.center.y - point.y;
         NSInteger dist = sqrtf(xd*xd + yd*yd);
-        if (dist < closestDist)
+        if (dist < closestDistance)
         {
-            closestDist = dist;
+            closestDistance = dist;
             indexPath = layoutAttr.indexPath;
         }
     }
@@ -525,7 +539,7 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
         {
             [self beginDragScrollTimer];
             
-            //Prevent scrolling if touch began inside a scroll border
+            //Prevent scrolling if touch began outside of the scroll borders
             if (touchPosition.x < dragScrollBorder.left ||
                 touchPosition.x > self.collectionView.frame.size.width - dragScrollBorder.right)
             {
@@ -595,10 +609,6 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
                     CGFloat distance_Y = touchPosition.y - borderPoint;
                     _dragScrollSpeed.y = speedProportionalToDistance(maxScrollSpeed.y, distance_Y, dragScrollBorder.bottom);
                 }
-                else
-                {
-                    
-                }
             }
             else
             {
@@ -615,38 +625,30 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
                 _dragScrollSpeed.y = 0;
             }
             
-            //NOTE: When the touch velocity is higher, we can assume the user is dragging out of this view
-            //We can forgo border scrolling to make a smother experience
-            //Cancel scrolling if touch is travelling at high speed
+            //NOTE: When the touch velocity is higher,
+            //we can assume the user is dragging out of this collection view.
+            //We can forgo border scrolling to make a smother experience.
+            //Cancel scrolling if touch is travelling at high speed.
             if ([sender velocityInView:self.collectionView].x > maxPanSpeed.right ||
                 [sender velocityInView:self.collectionView].x < -maxPanSpeed.left)
             {
                 _dragScrollSpeed.x = 0;
             }
-//            if ()
-//            {
-//                _dragScrollSpeed.x = 0;
-//            }
             if ([sender velocityInView:self.collectionView].y > maxPanSpeed.bottom ||
                 [sender velocityInView:self.collectionView].y < -maxPanSpeed.top)
             {
                 _dragScrollSpeed.y = 0;
             }
-//            if ()
-//            {
-//                _dragScrollSpeed.y = 0;
-//            }
         }
             break;
         case UIGestureRecognizerStateCancelled:
-            break;
+//            break;
         case UIGestureRecognizerStateEnded:
-            [self endDragScrollTimer];
-            _touchTranslation = CGPointZero;
-            break;
+//            [self endDragScrollTimer];
+//            _touchTranslation = CGPointZero;
+//            break;
         case UIGestureRecognizerStateFailed:
-            [self endDragScrollTimer];
-            _touchTranslation = CGPointZero;
+            [self resetDragAndDrop];
             break;
         default:
             break;

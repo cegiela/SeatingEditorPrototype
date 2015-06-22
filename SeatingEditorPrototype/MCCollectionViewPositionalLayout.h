@@ -39,20 +39,23 @@ typedef NS_OPTIONS(NSUInteger, MCCollectionViewLayoutStickyOptions)
 
 @interface MCCollectionViewPositionalLayout : UICollectionViewLayout
 
+- (void)handleLongPressGesture:(UILongPressGestureRecognizer *)sender;
+- (void)handlePanGesture:(UIPanGestureRecognizer *)sender;
+
 // Fallback size for all cells if no specific sizes provided
 @property (nonatomic) CGSize itemSize;
 
 @property (nonatomic, assign) id <MCCollectionViewDelegatePositionalLayout> delegate;
 @property (nonatomic, readonly) UILongPressGestureRecognizer *longPressGestureRecognizer;
 @property (nonatomic, readonly) UIPanGestureRecognizer *panGestureRecognizer;
-@property (nonatomic, readonly) UIImageView *liftedItemImage;
+@property (nonatomic, strong) UIImageView *liftedItemImage;
 
 @end
 
 @protocol MCCollectionViewPositionalLayoutCellDelegate <NSObject>
 
-- (void)hideLiftedView;
-- (void)showLiftedView;
+- (void)hideLiftableView;
+- (void)showLiftableView;
 
 @optional
 

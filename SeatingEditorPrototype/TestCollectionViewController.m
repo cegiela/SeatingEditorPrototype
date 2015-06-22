@@ -10,10 +10,16 @@
 #import "TestCollectionViewCell.h"
 #import "UIColor+RandomColor.h"
 #import "MCCollectionViewPositionalLayout.h"
+#import "MCCollectionViewEditableFlowLayout.h"
 
-@interface TestCollectionViewController () <MCCollectionViewDelegatePositionalLayout>
+@interface TestCollectionViewController ()
+<MCCollectionViewDelegatePositionalLayout, MCCollectionViewDelegateEditableFlowLayout>
 
-@property (nonatomic, strong) MCCollectionViewPositionalLayout *layout;
+@property (weak, nonatomic) IBOutlet UICollectionView *mainCollectionView;
+@property (weak, nonatomic) IBOutlet UICollectionView *trayCollectionView;
+
+@property (nonatomic, strong) MCCollectionViewPositionalLayout *positionalLayout;
+@property (nonatomic, strong) MCCollectionViewEditableFlowLayout *editableFlowLayout;
 @property (nonatomic, strong) NSMutableDictionary *colors;
 
 @end
@@ -28,24 +34,32 @@ static NSString * const reuseIdentifier = @"Cell";
     
     self.colors = [NSMutableDictionary new];
     
-    self.collectionView.contentInset = UIEdgeInsetsMake(0.f, 0.f, 88.f, 0.f);
+    self.mainCollectionView.contentInset = UIEdgeInsetsMake(0.f, 0.f, 88.f, 0.f);
     
-    [self.collectionView registerNib:[UINib nibWithNibName:@"TestCollectionViewCell" bundle:nil] forCellWithReuseIdentifier:reuseIdentifier];
+    [self.mainCollectionView registerNib:[UINib nibWithNibName:@"TestCollectionViewCell" bundle:nil] forCellWithReuseIdentifier:reuseIdentifier];
     
-    self.layout = (MCCollectionViewPositionalLayout*) self.collectionView.collectionViewLayout;
-    self.layout.delegate = self;
+    [self.trayCollectionView registerNib:[UINib nibWithNibName:@"TestCollectionViewCell" bundle:nil] forCellWithReuseIdentifier:reuseIdentifier];
+    
+    self.trayCollectionView.backgroundColor = [UIColor clearColor];
+    
+    self.editableFlowLayout = (MCCollectionViewEditableFlowLayout*) self.trayCollectionView.collectionViewLayout;
+    self.editableFlowLayout.delegate = self;
+    self.editableFlowLayout.scrollDirection = UICollectionViewScrollDirectionHorizontal;
+
+    self.positionalLayout = (MCCollectionViewPositionalLayout*) self.mainCollectionView.collectionViewLayout;
+    self.positionalLayout.delegate = self;
 }
 
 #pragma mark <UICollectionViewDataSource>
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
 {
-    return 16;
+    return collectionView == self.mainCollectionView ? 16 : 1;
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-    return 16;
+    return collectionView == self.mainCollectionView ? 16 : 10;
 }
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
@@ -83,6 +97,16 @@ static NSString * const reuseIdentifier = @"Cell";
 }
 
 #pragma mark <UICollectionViewDelegate>
+
+- (void)collectionView:(UICollectionView *)collectionView beganPanGesture:(UIPanGestureRecognizer *)panGesture
+{
+    [self.positionalLayout handlePanGesture:panGesture];
+}
+
+- (void)collectionView:(UICollectionView *)collectionView isTrackingPanGesture:(UIPanGestureRecognizer *)panGesture
+{
+    [self.positionalLayout handlePanGesture:panGesture];
+}
 
 /*
 // Uncomment this method to specify if the specified item should be highlighted during tracking

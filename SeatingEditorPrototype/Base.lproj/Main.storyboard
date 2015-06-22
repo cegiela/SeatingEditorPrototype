@@ -21,14 +21,34 @@
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                                 <collectionViewLayout key="collectionViewLayout" id="OWf-ai-ib9" customClass="MCCollectionViewPositionalLayout"/>
                                 <connections>
-                                    <outlet property="dataSource" destination="Rs1-Ca-E1t" id="AJ6-oT-lxh"/>
-                                    <outlet property="delegate" destination="Rs1-Ca-E1t" id="kYg-kk-9he"/>
+                                    <outlet property="dataSource" destination="Rs1-Ca-E1t" id="F2G-iB-qBA"/>
+                                    <outlet property="delegate" destination="Rs1-Ca-E1t" id="BvW-fp-tQ3"/>
                                 </connections>
                             </collectionView>
-                            <view alpha="0.49999999999999961" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="l4Y-0L-EuZ">
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="l4Y-0L-EuZ" userLabel="Edit Tray">
                                 <rect key="frame" x="0.0" y="512" width="600" height="88"/>
-                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                                <subviews>
+                                    <view userInteractionEnabled="NO" alpha="0.5" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Mym-fs-jhZ" userLabel="Background">
+                                        <rect key="frame" x="0.0" y="0.0" width="600" height="88"/>
+                                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                                    </view>
+                                    <collectionView multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="6By-E2-HE7">
+                                        <rect key="frame" x="0.0" y="0.0" width="600" height="88"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="88" id="O7d-Zq-btE"/>
+                                        </constraints>
+                                        <collectionViewLayout key="collectionViewLayout" id="Fvo-Kr-GQD" customClass="MCCollectionViewEditableFlowLayout"/>
+                                        <connections>
+                                            <outlet property="dataSource" destination="Rs1-Ca-E1t" id="JN9-L3-MHd"/>
+                                            <outlet property="delegate" destination="Rs1-Ca-E1t" id="uXw-A2-hq0"/>
+                                        </connections>
+                                    </collectionView>
+                                </subviews>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                                 <constraints>
+                                    <constraint firstAttribute="trailing" secondItem="6By-E2-HE7" secondAttribute="trailing" id="Ebx-Yi-sRx"/>
+                                    <constraint firstItem="6By-E2-HE7" firstAttribute="leading" secondItem="l4Y-0L-EuZ" secondAttribute="leading" id="EfI-H6-4jY"/>
+                                    <constraint firstAttribute="bottom" secondItem="6By-E2-HE7" secondAttribute="bottom" id="JdQ-VA-RZd"/>
                                     <constraint firstAttribute="height" constant="88" id="czv-Vu-iXG"/>
                                 </constraints>
                             </view>
@@ -45,7 +65,8 @@
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="collectionView" destination="4oc-VL-O6D" id="Iq0-V4-b5t"/>
+                        <outlet property="mainCollectionView" destination="4oc-VL-O6D" id="bBV-XH-rrC"/>
+                        <outlet property="trayCollectionView" destination="6By-E2-HE7" id="6gN-yR-1N1"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Ed4-RG-a6v" userLabel="First Responder" sceneMemberID="firstResponder"/>
