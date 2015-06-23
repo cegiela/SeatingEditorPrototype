@@ -98,15 +98,39 @@ static NSString * const reuseIdentifier = @"Cell";
 
 #pragma mark <UICollectionViewDelegate>
 
-- (void)collectionView:(UICollectionView *)collectionView beganPanGesture:(UIPanGestureRecognizer *)panGesture
+- (UIImageView*)collectionView:(UICollectionView *)collectionView liftedItemImageForLayout:(UICollectionViewLayout*)collectionViewLayout
 {
-    [self.positionalLayout handlePanGesture:panGesture];
+    return self.editableFlowLayout.liftedItemImage;
 }
 
-- (void)collectionView:(UICollectionView *)collectionView isTrackingPanGesture:(UIPanGestureRecognizer *)panGesture
+- (CGPoint)collectionView:(UICollectionView *)collectionView liftedItemPositionForLayout:(UICollectionViewLayout*)collectionViewLayout
 {
-    [self.positionalLayout handlePanGesture:panGesture];
+    //Translate position from one collectionView to the other
+    CGPoint convertedPoint = [self.trayCollectionView convertPoint:self.editableFlowLayout.liftedItemCenter toView:self.mainCollectionView];
+    return convertedPoint;
 }
+
+//- (void)collectionView:(UICollectionView *)collectionView beganPanGesture:(UIPanGestureRecognizer *)panGesture
+//{
+//    [self.positionalLayout handlePanGesture:panGesture];
+//}
+
+- (void)collectionView:(UICollectionView *)collectionView isTrackingGesture:(UIGestureRecognizer *)gesture
+{
+    if ([gesture isKindOfClass:[UIPanGestureRecognizer class]])
+    {
+        [self.positionalLayout handlePanGesture:(UIPanGestureRecognizer*)gesture];
+    }
+    else if ([gesture isKindOfClass:[UILongPressGestureRecognizer class]])
+    {
+        [self.positionalLayout handleLongPressGesture:(UILongPressGestureRecognizer*)gesture];
+    }
+}
+
+//- (void)collectionView:(UICollectionView *)collectionView endedPanGesture:(UIPanGestureRecognizer *)panGesture
+//{
+//    [self.positionalLayout handlePanGesture:panGesture];
+//}
 
 /*
 // Uncomment this method to specify if the specified item should be highlighted during tracking

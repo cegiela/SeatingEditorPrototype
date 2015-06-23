@@ -33,7 +33,11 @@ typedef NS_OPTIONS(NSUInteger, MCCollectionViewLayoutStickyOptions)
 
 - (BOOL)collectionView:(UICollectionView *)collectionView scrollDuringDraggingInLayout:(UICollectionViewLayout*)collectionViewLayout;
 
-- (void)collectionView:(UICollectionView *)collectionView isDraggingItemInLayout:(UICollectionViewLayout*)collectionViewLayout;
+//- (void)collectionView:(UICollectionView *)collectionView isDraggingItemInLayout:(UICollectionViewLayout*)collectionViewLayout;
+
+- (UIImageView*)collectionView:(UICollectionView *)collectionView liftedItemImageForLayout:(UICollectionViewLayout*)collectionViewLayout;
+
+- (CGPoint)collectionView:(UICollectionView *)collectionView liftedItemPositionForLayout:(UICollectionViewLayout*)collectionViewLayout;
 
 @end
 

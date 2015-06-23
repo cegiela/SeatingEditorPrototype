@@ -19,6 +19,7 @@
 
 @property (nonatomic, strong) NSIndexPath *liftedItemIndexPath;
 //@property (nonatomic, strong) UIImageView *liftedItemImage;
+@property (nonatomic, assign) CGPoint longPressLocation;
 @property (nonatomic, assign) CGPoint liftedItemCenter;
 @property (nonatomic, assign) CGPoint touchTranslation;
 
@@ -368,80 +369,110 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
     {
         case UIGestureRecognizerStateBegan:
         {
-            //Make sure gesture is native to this collection view
-            if (sender != self.longPressGestureRecognizer)
+            _longPressLocation = [sender locationInView:self.collectionView];
+            
+            //Check if gesture is native to this collection view
+            if (sender == self.longPressGestureRecognizer)
             {
-                return;
+                _liftedItemIndexPath = [self indexPathForItemClosestToPoint:_longPressLocation];
             }
-
-            CGPoint touchPoint = [sender locationInView:self.collectionView];
-            NSIndexPath *indexPath = [self indexPathForItemClosestToPoint:touchPoint];
-            
-            if (indexPath == nil)
+            else
             {
-                return;
+                _liftedItemIndexPath = [NSIndexPath indexPathForItem:NSIntegerMax inSection:NSIntegerMax];
+                
+//                UIView *mockView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 100, 100)];
+//                mockView.backgroundColor = [UIColor redColor];
+//                [self.collectionView addSubview:mockView];
+//                mockView.center = _liftedItemCenter;
             }
             
-            // Create lifted image to drag
-            UICollectionViewCell *cell = [self.collectionView cellForItemAtIndexPath:indexPath];
-            cell.highlighted = NO;
-            [_liftedItemImage removeFromSuperview];
-            _liftedItemImage = [[UIImageView alloc] initWithFrame:cell.frame];
-            _liftedItemImage.image = [self imageFromCell:cell];
-            _liftedItemCenter = _liftedItemImage.center;
-            _liftedItemIndexPath = indexPath;
-            
-            [self.collectionView addSubview:_liftedItemImage];
-            
-            [UIView
-             animateWithDuration:0.1
-             animations:^{
-                 _liftedItemImage.transform = CGAffineTransformMakeScale(1.1f, 1.1f);
-                 
-                 //Move the floating cell image up a bit for visibility
-                 _liftedItemImage.center = verticalOffsetRelativeToSize(_liftedItemImage.center, _liftedItemImage.frame.size);
-             }
-             completion:^(BOOL finished){
-                 _liftedItemCenter = _liftedItemImage.center;
-             }];
+            [self beginDragAndDrop];
         } break;
         case UIGestureRecognizerStateEnded:
         case UIGestureRecognizerStateCancelled:
-        {
-            if(_liftedItemIndexPath == nil)
-            {
-                return;
-            }
-            
-            // Land lifted image
-            NSIndexPath *indexPath = [self indexPathForItemClosestToPoint:_liftedItemImage.center];
-            UICollectionViewLayoutAttributes *itemAttributes = [self.collectionView layoutAttributesForItemAtIndexPath:indexPath];
-
-            [UIView
-             animateWithDuration:0.2
-             animations:^{
-                 _liftedItemImage.center = itemAttributes.center;
-                 _liftedItemImage.transform = CGAffineTransformMakeScale(1.f, 1.f);
-             }
-             completion:^(BOOL finished){
-                 [_liftedItemImage removeFromSuperview];
-                 _liftedItemImage = nil;
-                 _liftedItemIndexPath = nil;
-                 [self resetOverscroll];
-//                 [self resetDragAndDrop];
-             }];
-            
-        } break;
+            [self endDragAndDrop];
+            break;
         default: break;
     }
 }
 
-- (void)resetDragAndDrop
+- (void)beginDragAndDrop
 {
+    if (_liftedItemIndexPath.section == NSIntegerMax)
+    {
+        //Ask delegate for a lifted item image
+        _liftedItemImage = [self.delegate collectionView:self.collectionView liftedItemImageForLayout:self];
+        _liftedItemCenter = [self.delegate collectionView:self.collectionView liftedItemPositionForLayout:self];
+    }
+    else
+    {
+        // Create a lifted image to drag
+        UICollectionViewCell *cell = [self.collectionView cellForItemAtIndexPath:_liftedItemIndexPath];
+        cell.highlighted = NO;
+        //    [_liftedItemImage removeFromSuperview];
+        _liftedItemImage = [[UIImageView alloc] initWithFrame:cell.frame];
+        _liftedItemImage.image = [self imageFromCell:cell];
+        _liftedItemCenter = _liftedItemImage.center;
+//        _liftedItemIndexPath = indexPath;
+        
+        [self.collectionView addSubview:_liftedItemImage];
+        
+        [UIView
+         animateWithDuration:0.1
+         animations:^{
+             _liftedItemImage.transform = CGAffineTransformMakeScale(1.1f, 1.1f);
+             
+             //Move the floating cell image up a bit for visibility
+             _liftedItemImage.center = verticalOffsetRelativeToSize(_liftedItemImage.center, _liftedItemImage.frame.size);
+         }
+         completion:^(BOOL finished){
+             _liftedItemCenter = _liftedItemImage.center;
+         }];
+    }
+}
+
+- (void)endDragAndDrop
+{
+    if (_liftedItemIndexPath == nil)
+    {
+        return;
+    }
+    
+    //Check if the lifted item originated in this collectionView
+    if (_liftedItemIndexPath.section == NSIntegerMax)
+    {
+        //Switch adopted liftedItemImage to this collectionView for landing animation
+        [_liftedItemImage removeFromSuperview];
+        [self.collectionView addSubview:_liftedItemImage];
+//        _liftedItemCenter = [self.delegate collectionView:self.collectionView liftedItemPositionForLayout:self];
+//        _liftedItemImage.center = _liftedItemCenter;
+        _liftedItemImage.center = pointAplusB(_liftedItemCenter, _touchTranslation);
+        
+    }
+    
+    //Prevent the following running twice
+    _liftedItemIndexPath = nil;
+    
     [self endDragScrollTimer];
     _touchTranslation = CGPointZero;
     _dragScrollSpeed.x = 0;
     _dragScrollSpeed.y = 0;
+    
+    //Land lifted image
+    NSIndexPath *indexPath = [self indexPathForItemClosestToPoint:_liftedItemImage.center];
+    UICollectionViewLayoutAttributes *itemAttributes = [self.collectionView layoutAttributesForItemAtIndexPath:indexPath];
+    
+    [UIView
+     animateWithDuration:0.2
+     animations:^{
+         _liftedItemImage.center = itemAttributes.center;
+         _liftedItemImage.transform = CGAffineTransformMakeScale(1.f, 1.f);
+     }
+     completion:^(BOOL finished){
+         [_liftedItemImage removeFromSuperview];
+         _liftedItemImage = nil;
+         [self resetOverscroll];
+     }];
 
     //                 [self.collectionView.collectionViewLayout invalidateLayout];
 }
@@ -537,6 +568,11 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
     {
         case UIGestureRecognizerStateBegan:
         {
+//            if (_liftedItemIndexPath == nil)
+//            {
+//                
+//            }
+            
             [self beginDragScrollTimer];
             
             //Prevent scrolling if touch began outside of the scroll borders
@@ -556,7 +592,11 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
         case UIGestureRecognizerStateChanged:
         {
             _touchTranslation = [sender translationInView:self.collectionView];
-            _liftedItemImage.center = pointAplusB(_liftedItemCenter, _touchTranslation);
+
+            if (sender == self.panGestureRecognizer)
+            {
+                _liftedItemImage.center = pointAplusB(_liftedItemCenter, _touchTranslation);
+            }
             
             _dragScrollSpeed = CGPointZero;
             
@@ -648,7 +688,7 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
 //            _touchTranslation = CGPointZero;
 //            break;
         case UIGestureRecognizerStateFailed:
-            [self resetDragAndDrop];
+            [self endDragAndDrop];
             break;
         default:
             break;
@@ -680,7 +720,7 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
         return;
     }
     
-    //NOTE: Currently overscroll is acomplished by dampening the scroll speed beyond bounds
+    //NOTE: Currently overscroll is acomplished by dampening the scroll speed when beyond bounds
     //It may be better to have it proportional to touch proximity to edge of screen (both in and out)
 
     CGPoint initialContentOffset = self.collectionView.contentOffset;
@@ -728,12 +768,16 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
     self.collectionView.contentOffset = newOffset;
     
     //Check actual amount scrolled (fractional amounts will be ingnored by the scrollView)
-    CGPoint actualScrolledDistance = CGPointMake(self.collectionView.contentOffset.x - initialContentOffset.x,
-                                                 self.collectionView.contentOffset.y - initialContentOffset.y);
+    CGPoint actualScrolledDistance = CGPointMake(self.collectionView.contentOffset.x - initialContentOffset.x, self.collectionView.contentOffset.y - initialContentOffset.y);
     
-    //Adjust lifted item position to stay in sync
     _liftedItemCenter = pointAplusB(_liftedItemCenter, actualScrolledDistance);
-    _liftedItemImage.center = pointAplusB(_liftedItemCenter, _touchTranslation);
+
+    //Check if lifted item originated from this collectionView
+    if (_liftedItemIndexPath.section != NSIntegerMax)
+    {
+        //Adjust lifted item position to stay in sync
+        _liftedItemImage.center = pointAplusB(_liftedItemCenter, _touchTranslation);
+    }
 }
 
 #pragma mark - Gesture Recogniser Delegate

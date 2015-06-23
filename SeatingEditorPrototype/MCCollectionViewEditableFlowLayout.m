@@ -15,7 +15,7 @@
 
 @property (nonatomic, strong) NSIndexPath *liftedItemIndexPath;
 //@property (nonatomic, strong) UIImageView *liftedItemImage;
-@property (nonatomic, assign) CGPoint liftedItemCenter;
+//@property (nonatomic, assign) CGPoint liftedItemCenter;
 @property (nonatomic, assign) CGPoint touchTranslation;
 
 @end
@@ -94,7 +94,6 @@ CGPoint pointAminusB(CGPoint pointA, CGPoint pointB)
             // Create lifted image to drag
             UICollectionViewCell *cell = [self.collectionView cellForItemAtIndexPath:indexPath];
             cell.highlighted = NO;
-            [_liftedItemImage removeFromSuperview];
             _liftedItemImage = [[UIImageView alloc] initWithFrame:cell.frame];
             _liftedItemImage.image = [self imageFromCell:cell];
             _liftedItemCenter = _liftedItemImage.center;
@@ -112,33 +111,33 @@ CGPoint pointAminusB(CGPoint pointA, CGPoint pointB)
              }
              completion:^(BOOL finished){
                  _liftedItemCenter = _liftedItemImage.center;
+                 [self.delegate collectionView:self.collectionView isTrackingGesture:sender];
              }];
         } break;
         case UIGestureRecognizerStateEnded:
         case UIGestureRecognizerStateCancelled:
         {
-            if(_liftedItemIndexPath == nil)
-            {
-                return;
-            }
+            _liftedItemIndexPath = nil;
+//            if(_liftedItemIndexPath == nil)
+//            {
+//                return;
+//            }
             
             // Land lifted image
-            NSIndexPath *indexPath = [self indexPathForItemClosestToPoint:_liftedItemImage.center];
-            UICollectionViewLayoutAttributes *itemAttributes = [self.collectionView layoutAttributesForItemAtIndexPath:indexPath];
-            
-            [UIView
-             animateWithDuration:0.2
-             animations:^{
-                 _liftedItemImage.center = itemAttributes.center;
-                 _liftedItemImage.transform = CGAffineTransformMakeScale(1.f, 1.f);
-             }
-             completion:^(BOOL finished){
-                 [_liftedItemImage removeFromSuperview];
-                 _liftedItemImage = nil;
-                 _liftedItemIndexPath = nil;
-                 //                 [self.collectionView.collectionViewLayout invalidateLayout];
-//                 [self resetOverscroll];
-             }];
+//            NSIndexPath *indexPath = [self indexPathForItemClosestToPoint:_liftedItemImage.center];
+//            UICollectionViewLayoutAttributes *itemAttributes = [self.collectionView layoutAttributesForItemAtIndexPath:indexPath];
+//            
+//            [UIView
+//             animateWithDuration:0.2
+//             animations:^{
+//                 _liftedItemImage.center = itemAttributes.center;
+//                 _liftedItemImage.transform = CGAffineTransformMakeScale(1.f, 1.f);
+//             }
+//             completion:^(BOOL finished){
+//                 [_liftedItemImage removeFromSuperview];
+//                 _liftedItemImage = nil;
+//                 _liftedItemIndexPath = nil;
+//             }];
             
         } break;
         default: break;
@@ -190,26 +189,30 @@ CGPoint pointAminusB(CGPoint pointA, CGPoint pointB)
     {
         case UIGestureRecognizerStateBegan:
         {
-            [self.delegate collectionView:self.collectionView beganPanGesture:sender];
+//            [self.delegate collectionView:self.collectionView beganPanGesture:sender];
         }
             break;
             
         case UIGestureRecognizerStateChanged:
-            [self.delegate collectionView:self.collectionView isTrackingPanGesture:sender];
+//            [self.delegate collectionView:self.collectionView isTrackingPanGesture:sender];
             _touchTranslation = [sender translationInView:self.collectionView];
             _liftedItemImage.center = pointAplusB(_liftedItemCenter, _touchTranslation);
             break;
         case UIGestureRecognizerStateCancelled:
-            break;
+//            break;
         case UIGestureRecognizerStateEnded:
-            _touchTranslation = CGPointZero;
-            break;
+//            _touchTranslation = CGPointZero;
+//            break;
         case UIGestureRecognizerStateFailed:
+//            [self.delegate collectionView:self.collectionView endedPanGesture:sender];
             _touchTranslation = CGPointZero;
+            [_liftedItemImage removeFromSuperview];
             break;
         default:
             break;
     }
+    
+    [self.delegate collectionView:self.collectionView isTrackingGesture:sender];
 }
 
 #pragma mark - Gesture Recogniser Delegate
@@ -226,18 +229,20 @@ CGPoint pointAminusB(CGPoint pointA, CGPoint pointB)
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
 {
+    BOOL response = NO;
+    
     //Pan should work with long press, but not other gestures
     if ([gestureRecognizer isEqual:_longPressGestureRecognizer])
     {
-        return [otherGestureRecognizer isEqual:_panGestureRecognizer];
+        response = [otherGestureRecognizer isEqual:_panGestureRecognizer];
     }
     
     if ([gestureRecognizer isEqual:_panGestureRecognizer])
     {
-        return ([otherGestureRecognizer isEqual:_longPressGestureRecognizer]);
+        response = [otherGestureRecognizer isEqual:_longPressGestureRecognizer];
     }
     
-    return NO;
+    return response;
 }
 
 @end
