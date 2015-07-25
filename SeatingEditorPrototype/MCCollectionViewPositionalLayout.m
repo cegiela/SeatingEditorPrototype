@@ -721,7 +721,7 @@ CGFloat factorByOverscroll(CGFloat overscroll, CGFloat maxOverscroll)
     }
     
     //NOTE: Currently overscroll is acomplished by dampening the scroll speed when beyond bounds
-    //It may be better to have it proportional to touch proximity to edge of screen (both in and out)
+    //It may be better to have it proportional to touch proximity to edge of screen
 
     CGPoint initialContentOffset = self.collectionView.contentOffset;
     CGSize contentSize = self.collectionView.contentSize;

@@ -14,8 +14,6 @@
 @property (nonatomic, strong) UIPanGestureRecognizer *panGestureRecognizer;
 
 @property (nonatomic, strong) NSIndexPath *liftedItemIndexPath;
-//@property (nonatomic, strong) UIImageView *liftedItemImage;
-//@property (nonatomic, assign) CGPoint liftedItemCenter;
 @property (nonatomic, assign) CGPoint touchTranslation;
 
 @end
@@ -118,27 +116,6 @@ CGPoint pointAminusB(CGPoint pointA, CGPoint pointB)
         case UIGestureRecognizerStateCancelled:
         {
             _liftedItemIndexPath = nil;
-//            if(_liftedItemIndexPath == nil)
-//            {
-//                return;
-//            }
-            
-            // Land lifted image
-//            NSIndexPath *indexPath = [self indexPathForItemClosestToPoint:_liftedItemImage.center];
-//            UICollectionViewLayoutAttributes *itemAttributes = [self.collectionView layoutAttributesForItemAtIndexPath:indexPath];
-//            
-//            [UIView
-//             animateWithDuration:0.2
-//             animations:^{
-//                 _liftedItemImage.center = itemAttributes.center;
-//                 _liftedItemImage.transform = CGAffineTransformMakeScale(1.f, 1.f);
-//             }
-//             completion:^(BOOL finished){
-//                 [_liftedItemImage removeFromSuperview];
-//                 _liftedItemImage = nil;
-//                 _liftedItemIndexPath = nil;
-//             }];
-            
         } break;
         default: break;
     }
@@ -188,23 +165,15 @@ CGPoint pointAminusB(CGPoint pointA, CGPoint pointB)
     switch (sender.state)
     {
         case UIGestureRecognizerStateBegan:
-        {
-//            [self.delegate collectionView:self.collectionView beganPanGesture:sender];
-        }
             break;
             
         case UIGestureRecognizerStateChanged:
-//            [self.delegate collectionView:self.collectionView isTrackingPanGesture:sender];
             _touchTranslation = [sender translationInView:self.collectionView];
             _liftedItemImage.center = pointAplusB(_liftedItemCenter, _touchTranslation);
             break;
         case UIGestureRecognizerStateCancelled:
-//            break;
         case UIGestureRecognizerStateEnded:
-//            _touchTranslation = CGPointZero;
-//            break;
         case UIGestureRecognizerStateFailed:
-//            [self.delegate collectionView:self.collectionView endedPanGesture:sender];
             _touchTranslation = CGPointZero;
             [_liftedItemImage removeFromSuperview];
             break;
